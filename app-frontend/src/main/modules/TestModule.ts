@@ -1,5 +1,5 @@
 /*
- * A backend boilerplate with example apis
+ * A typescript & react boilerplate with api call example
  *
  * Copyright (C) 2018  Adam van der Kruk aka TacB0sS
  *
@@ -16,4 +16,18 @@
  * limitations under the License.
  */
 
-module.exports = require("@nu-art/permissions/app-backend/api/v1/permissions/_permissions");
+import {Module} from "@nu-art/ts-common";
+import {TestDispatch} from "@modules/ExampleModule";
+
+export class Test_Class
+	extends Module<{}>
+	implements TestDispatch {
+
+	testDispatch = () => {
+
+	};
+
+
+}
+
+export const Test = new Test_Class();

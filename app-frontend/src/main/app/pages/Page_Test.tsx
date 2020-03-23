@@ -1,5 +1,5 @@
 /*
- * A backend boilerplate with example apis
+ * A typescript & react boilerplate with api call example
  *
  * Copyright (C) 2018  Adam van der Kruk aka TacB0sS
  *
@@ -16,4 +16,28 @@
  * limitations under the License.
  */
 
-module.exports = require("@nu-art/permissions/app-backend/api/v1/permissions/_permissions");
+import {BaseComponent} from "@nu-art/thunderstorm/frontend";
+import * as React from "react";
+import {
+	ExampleModule,
+	TestDispatch
+} from "@modules/ExampleModule";
+
+export class Page_Test
+	extends BaseComponent
+	implements TestDispatch {
+
+	testDispatch = () => {
+		this.forceUpdate();
+	};
+
+	render() {
+		const data = ExampleModule.getData();
+		return <>
+			<h1>Hi</h1>
+			<div>My number is {data.join(', ')}</div>
+			<button onClick={() => ExampleModule.testClickHandler()}>Click me</button>
+		</>;
+	}
+
+}

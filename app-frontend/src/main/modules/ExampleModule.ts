@@ -16,10 +16,14 @@
  * limitations under the License.
  */
 
-import {Module} from "@nu-art/ts-common";
+import {
+	Module,
+	Second
+} from "@nu-art/ts-common";
 
 import {
 	HttpModule,
+	ThunderDispatcher,
 	ToastModule
 } from "@nu-art/thunderstorm/frontend";
 import {
@@ -43,53 +47,73 @@ export const RequestKey_CustomError = "CustomError";
 export const RequestKey_PostApi = "PostApi";
 export const RequestKey_GetApi = "GetApi";
 
+export interface TestDispatch {
+	testDispatch: () => void
+}
+
 export class ExampleModule_Class
 	extends Module<Config> {
-
-
 	private message!: string;
+	thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
+
+	data: string[] = [];
+
+	getData = () => this.data;
+
+	setData = () => {
+		this.data = ['a','b'];
+	}
+
+	testClickHandler = () => {
+		console.log('hi');
+		setTimeout(() => {
+			this.setData();
+			this.thunderDispatcher.dispatchUI([])
+			this.thunderDispatcher.dispatchModule([])
+		}, 2 * Second)
+	}
 
 	callCustomErrorApi() {
-		HttpModule.createRequest<ExampleApiCustomError>(HttpMethod.POST, RequestKey_CustomError)
-		          .setRelativeUrl("/v1/sample/custom-error")
-		          .setOnError((request, resError?: ErrorResponse<CustomError1 | CustomError2>) => {
-			          const error = resError?.error;
-			          if (!error)
-				          return;
+		HttpModule
+			.createRequest<ExampleApiCustomError>(HttpMethod.POST, RequestKey_CustomError)
+			.setRelativeUrl("/v1/sample/custom-error")
+			.setOnError((request, resError?: ErrorResponse<CustomError1 | CustomError2>) => {
+				const error = resError?.error;
+				if (!error)
+					return;
 
-			          const errorType = error.type;
-			          if (!errorType)
-				          return;
+				const errorType = error.type;
+				if (!errorType)
+					return;
 
-			          let errorBody: CustomError1 | CustomError2 | undefined;
-			          switch (errorType) {
-				          case "CustomError1":
-					          errorBody = error.body as CustomError1;
-					          ToastModule.toastError(`${errorBody.prop1}\n${errorBody.prop2}`);
-					          break;
+				let errorBody: CustomError1 | CustomError2 | undefined;
+				switch (errorType) {
+					case "CustomError1":
+						errorBody = error.body as CustomError1;
+						ToastModule.toastError(`${errorBody.prop1}\n${errorBody.prop2}`);
+						break;
 
-				          case "CustomError2":
-					          errorBody = error.body as CustomError2;
-					          ToastModule.toastError(`${errorBody.prop3}\n${errorBody.prop4}`);
-					          break;
-			          }
-		          })
-		          .setOnSuccessMessage(`Success`)
-		          .execute();
-
-
+					case "CustomError2":
+						errorBody = error.body as CustomError2;
+						ToastModule.toastError(`${errorBody.prop3}\n${errorBody.prop4}`);
+						break;
+				}
+			})
+			.setOnSuccessMessage(`Success`)
+			.execute();
 	}
 
 	public getMessageFromServer1 = () => {
 		this.logInfo("getting label from server");
 		const bodyObject: CommonBodyReq = {message: this.message || "No message"};
 
-		HttpModule.createRequest<ExampleApiPostType>(HttpMethod.POST, RequestKey_PostApi)
-		          .setJsonBody(bodyObject)
-		          .setRelativeUrl("/v1/sample/another-endpoint")
-		          .setOnError(`Error getting new message from backend`)
-		          .setOnSuccessMessage(`Success`)
-		          .execute(this.setMessage);
+		HttpModule
+			.createRequest<ExampleApiPostType>(HttpMethod.POST, RequestKey_PostApi)
+			.setJsonBody(bodyObject)
+			.setRelativeUrl("/v1/sample/another-endpoint")
+			.setOnError(`Error getting new message from backend`)
+			.setOnSuccessMessage(`Success`)
+			.execute(this.setMessage);
 
 		this.logInfo("continue... will receive an event once request is completed..");
 	};
@@ -97,12 +121,13 @@ export class ExampleModule_Class
 	public getMessageFromServer2 = () => {
 		this.logInfo("getting label from server");
 
-		HttpModule.createRequest<ExampleApiGetType>(HttpMethod.GET, RequestKey_GetApi)
-		          .setRelativeUrl(this.config.remoteUrl)
-		          .setOnError(`Error getting new message from backend`)
-		          .execute(async response => {
-			          this.message = response;
-		          });
+		HttpModule
+			.createRequest<ExampleApiGetType>(HttpMethod.GET, RequestKey_GetApi)
+			.setRelativeUrl(this.config.remoteUrl)
+			.setOnError(`Error getting new message from backend`)
+			.execute(async response => {
+				this.message = response;
+			});
 
 		this.logInfo("continue... will receive an event once request is completed..");
 	};
