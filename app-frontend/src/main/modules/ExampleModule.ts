@@ -46,10 +46,6 @@ export const RequestKey_TestApi = "TestApi";
 export interface TestDispatch {
 	testDispatch:() => void;
 }
-
-export interface ModDispatch {
-	modDispatch:() => void;
-}
 export class ExampleModule_Class
 	extends Module<Config> {
 
@@ -57,7 +53,6 @@ export class ExampleModule_Class
 	thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
 	data: string[] = [];
-	mod_data: number = 1;
 	api_data: string = 'hi my name is';
 
 	callCustomErrorApi() {
@@ -118,12 +113,6 @@ export class ExampleModule_Class
 		this.logInfo("continue... will receive an event once request is completed..");
 	};
 
-	// public testApiCall = () => {
-	// 	console.log("trying to reach the server...");
-	// 	HttpModule.createRequest<ExampleApiTest>(HttpMethod.GET, RequestKey_TestApi)
-	// }
-
-
 	setMessage = async (message: string) => {
 		this.logInfo(`got message: ${message}`);
 		this.message = message;
@@ -138,7 +127,6 @@ export class ExampleModule_Class
 	};
 
 	getApiData = () => this.api_data;
-
 
 	testClickHandler = () => {
 		console.log('testing...');

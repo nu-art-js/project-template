@@ -22,7 +22,7 @@ import {Second} from "@nu-art/ts-common";
 import {
     ExampleModule,
     TestDispatch,
-    ModDispatch
+
 } from "@modules/ExampleModule";
 import {
     Test
@@ -33,21 +33,15 @@ export interface UIDispatch {
     uiDispatch:() => void;
 }
 export class Page_Test extends BaseComponent
-implements TestDispatch, ModDispatch, UIDispatch{
-    uiDispatcher = new ThunderDispatcher<UIDispatch, 'uiDispatch'>('uiDispatch');
+implements TestDispatch{
+    uiDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
     testDispatch = () => {
         this.forceUpdate();
     };
-    modDispatch = () => {
-        this.forceUpdate();
-    };
-    uiDispatch = () => {
-        this.forceUpdate();
-    };
+
 
     col: string = '#ffc0cb';
-
     setCol = () => {
         this.col = '#a6f6ea';
     };

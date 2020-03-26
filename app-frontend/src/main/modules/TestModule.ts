@@ -17,16 +17,16 @@
  */
 
 import {Module} from "@nu-art/ts-common";
-import {ModDispatch} from "@modules/ExampleModule";
+import {TestDispatch} from "@modules/ExampleModule";
 import {ThunderDispatcher} from "@nu-art/thunderstorm/frontend";
 
 
 export class Test_Class
     extends Module<{}>
-    implements ModDispatch {
-    modDispatcher = new ThunderDispatcher<ModDispatch, 'modDispatch'>('modDispatch');
+    implements TestDispatch {
+    modDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
-    modDispatch = () => {
+    testDispatch = () => {
     };
 
     mod_data: number = 1;
