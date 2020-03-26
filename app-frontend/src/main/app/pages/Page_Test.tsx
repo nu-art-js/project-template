@@ -28,10 +28,6 @@ import {
     Test
 } from "@modules/TestModule";
 
-
-export interface UIDispatch {
-    uiDispatch:() => void;
-}
 export class Page_Test extends BaseComponent
 implements TestDispatch{
     uiDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
@@ -39,7 +35,6 @@ implements TestDispatch{
     testDispatch = () => {
         this.forceUpdate();
     };
-
 
     col: string = '#ffc0cb';
     setCol = () => {
