@@ -1,5 +1,5 @@
 /*
- * A backend boilerplate with example apis
+ * A typescript & react boilerplate with api call example
  *
  * Copyright (C) 2018  Adam van der Kruk aka TacB0sS
  *
@@ -15,23 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {Module} from "@nu-art/ts-common";
+import {ModDispatch} from "@modules/ExampleModule";
+import {ThunderDispatcher} from "@nu-art/thunderstorm/frontend";
 
-type Config = {
-	options: string[],
-	dispatchNum: string
+
+export class Test_Class
+    extends Module<{}>
+    implements ModDispatch {
+    modDispatcher = new ThunderDispatcher<ModDispatch, 'modDispatch'>('modDispatch');
+
+    modDispatch = () => {
+    };
+
+    mod_data: number = 1;
+
+    getModData = () => this.mod_data;
+
+    setModData = () => {
+        this.mod_data = 10;
+        this.modDispatcher.dispatchUI([]);
+        this.modDispatcher.dispatchModule([])
+    };
 }
 
-export class ExampleModule_Class
-	extends Module<Config> {
-
-	getRandomString() {
-		return this.config.options[Math.floor(Math.random() * (this.config.options.length))];
-	}
-
-	getDispatchNumber(){
-		return this.config.dispatchNum;
-	}
-}
-
-export const ExampleModule = new ExampleModule_Class();
+export const Test = new Test_Class();

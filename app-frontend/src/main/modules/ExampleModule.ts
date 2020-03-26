@@ -16,24 +16,22 @@
  * limitations under the License.
  */
 
-import {Module} from "@nu-art/ts-common";
+import {Module, Second} from "@nu-art/ts-common";
 
-import {
-	HttpModule,
-	ToastModule
-} from "@nu-art/thunderstorm/frontend";
+import {HttpModule, ThunderDispatcher, ToastModule} from "@nu-art/thunderstorm/frontend";
 import {
 	CommonBodyReq,
 	CustomError1,
 	CustomError2,
 	ExampleApiCustomError,
 	ExampleApiGetType,
+	ExampleApiTest,
 	ExampleApiPostType
 } from "@app/sample-app-shared";
+import {ErrorResponse, HttpMethod} from "@nu-art/thunderstorm";
 import {
-	ErrorResponse,
-	HttpMethod
-} from "@nu-art/thunderstorm";
+	Test
+} from "@modules/TestModule";
 
 type Config = {
 	remoteUrl: string
@@ -42,12 +40,25 @@ type Config = {
 export const RequestKey_CustomError = "CustomError";
 export const RequestKey_PostApi = "PostApi";
 export const RequestKey_GetApi = "GetApi";
+export const RequestKey_TestApi = "TestApi";
 
+
+export interface TestDispatch {
+	testDispatch:() => void;
+}
+
+export interface ModDispatch {
+	modDispatch:() => void;
+}
 export class ExampleModule_Class
 	extends Module<Config> {
 
-
 	private message!: string;
+	thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
+
+	data: string[] = [];
+	mod_data: number = 1;
+	api_data: string = 'hi my name is';
 
 	callCustomErrorApi() {
 		HttpModule.createRequest<ExampleApiCustomError>(HttpMethod.POST, RequestKey_CustomError)
@@ -107,6 +118,11 @@ export class ExampleModule_Class
 		this.logInfo("continue... will receive an event once request is completed..");
 	};
 
+	// public testApiCall = () => {
+	// 	console.log("trying to reach the server...");
+	// 	HttpModule.createRequest<ExampleApiTest>(HttpMethod.GET, RequestKey_TestApi)
+	// }
+
 
 	setMessage = async (message: string) => {
 		this.logInfo(`got message: ${message}`);
@@ -114,6 +130,47 @@ export class ExampleModule_Class
 	};
 
 	getMessage = () => this.message;
+
+	getData = () => this.data;
+
+	setData = () => {
+		this.data = ['hey ','there!'];
+	};
+
+	getApiData = () => this.api_data;
+
+
+	testClickHandler = () => {
+		console.log('testing...');
+		setTimeout(() => {
+			this.setData();
+			this.thunderDispatcher.dispatchUI([]);
+			this.thunderDispatcher.dispatchModule([])
+		}, 2 * Second)
+	};
+
+	testModDispatcher = () => {
+		console.log("testing the mod dispatcher");
+		setTimeout(() => {
+			Test.setModData();
+		}, 2 * Second)
+	};
+
+	testBackendDispatcher = () => {
+		this.logInfo("passing to server");
+		HttpModule.createRequest<ExampleApiTest>(HttpMethod.GET, RequestKey_TestApi)
+			.setRelativeUrl("/v1/sample/dispatch-endpoint")
+			.setOnError(`Error getting a message from backend`)
+			.execute(async response => {
+				console.log("i think i got something...");
+				console.log(response);
+				this.api_data = response;
+				this.thunderDispatcher.dispatchUI([]);
+				this.thunderDispatcher.dispatchModule([])
+			});
+
+		this.logInfo("continue... will receive an event once request is completed..");
+	}
 }
 
 export const ExampleModule = new ExampleModule_Class();

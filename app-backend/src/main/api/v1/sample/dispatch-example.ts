@@ -15,23 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Module} from "@nu-art/ts-common";
+import {
+    ApiResponse,
+    ServerApi_Get,
+} from "@nu-art/thunderstorm/backend";
 
-type Config = {
-	options: string[],
-	dispatchNum: string
+import * as express from "express";
+import {ExampleModule} from "@modules/ExampleModule";
+import {ExampleApiTest} from "@app/sample-app-shared";
+
+class ServerApi_EndpointExample
+    extends ServerApi_Get<ExampleApiTest> {
+
+    constructor() {
+        super("dispatch-endpoint");
+    }
+
+    protected async process(request: express.Request, response: ApiResponse, queryParams: {}, body: void) {
+        return ExampleModule.getDispatchNumber();
+    }
 }
 
-export class ExampleModule_Class
-	extends Module<Config> {
+module.exports = new ServerApi_EndpointExample();
 
-	getRandomString() {
-		return this.config.options[Math.floor(Math.random() * (this.config.options.length))];
-	}
 
-	getDispatchNumber(){
-		return this.config.dispatchNum;
-	}
-}
-
-export const ExampleModule = new ExampleModule_Class();

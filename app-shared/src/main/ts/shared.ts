@@ -42,7 +42,7 @@ export type CustomError2 = {
 export type ExampleApiCustomError = ApiWithBody<"/v1/sample/custom-error", void, void, CustomError1 | CustomError2>
 export type ExampleApiPostType = ApiWithBody<"/v1/sample/another-endpoint", CommonBodyReq, string>
 export type ExampleApiGetType = ApiWithQuery<string, string>
-
+export type ExampleApiTest = ApiWithQuery<string, string>
 export type ApiType_GetWithoutParams = ApiWithQuery<"/v1/sample/get-without-params-endpoint", string>
 export type ApiType_ApiGetWithParams = ApiWithQuery<"/v1/sample/get-with-params-endpoint", string, ParamsToGet>
 export type ApiType_ApiPostWithoutResponse = ApiWithBody<"/v1/sample/post-without-body-endpoint", CommonBodyReq, void>
