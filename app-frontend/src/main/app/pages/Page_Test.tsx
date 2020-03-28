@@ -16,54 +16,61 @@
  * limitations under the License.
  */
 
-import {BaseComponent, ThunderDispatcher} from "@nu-art/thunderstorm/frontend";
+import {
+	BaseComponent,
+	ThunderDispatcher
+} from "@nu-art/thunderstorm/frontend";
 import * as React from "react";
 import {Second} from "@nu-art/ts-common";
-import {
-    ExampleModule,
-    TestDispatch,
+import {ExampleModule,} from "@modules/ExampleModule";
+import {Test} from "@modules/TestModule";
+import {TestDispatch} from "@app/sample-app-shared";
 
-} from "@modules/ExampleModule";
-import {
-    Test
-} from "@modules/TestModule";
+export class Page_Test
+	extends BaseComponent
+	implements TestDispatch {
+	uiDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
-export class Page_Test extends BaseComponent
-implements TestDispatch{
-    uiDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
+	componentDidMount(): void {
+		ExampleModule.fetchMax()
+	}
 
-    testDispatch = () => {
-        this.forceUpdate();
-    };
+	testDispatch = () => {
+		this.forceUpdate();
+	};
 
-    col: string = '#ffc0cb';
-    setCol = () => {
-        this.col = '#a6f6ea';
-    };
+	col: string = '#ffc0cb';
+	setCol = () => {
+		this.col = '#a6f6ea';
+	};
 
-    uiClickHandler = () => {
-        console.log("changing component 2 color...");
-        setTimeout(() => {
-            this.setCol();
-            this.uiDispatcher.dispatchUI([]);
-        }, 2 * Second)
-    };
+	uiClickHandler = () => {
+		console.log("changing component 2 color...");
+		setTimeout(() => {
+			this.setCol();
+			this.uiDispatcher.dispatchUI([]);
+		}, 2 * Second)
+	};
 
 
-    render() {
-        const data = ExampleModule.getData();
-        const modData = Test.getModData();
-        const apiData = ExampleModule.getApiData();
-        return <>
-            <h1>mod --> UI dispatch data: {data}.</h1>
-            <button onClick={() => ExampleModule.testClickHandler()}>click me to test mod --> UI dispatch</button>
-            <h1>mod --> mod dispatch data: {modData}</h1>
-            <button onClick={() => ExampleModule.testModDispatcher()}>click me to test mod --> mod dispatch</button>
-            <div><button style={{background:'#4e69ab'}} onClick={() => this.uiClickHandler()}>click me to change another component's color</button></div>
-            <div style={{background: this.col}}>component 2: {this.col}</div>
-            <h1>backend --> ui dispatch data: {apiData}</h1>
-            <button onClick={() => ExampleModule.testBackendDispatcher()}>click me to test api dispatch </button>
-        </>;
-    }
+	render() {
+		const data = ExampleModule.getData();
+		const modData = Test.getModData();
+		const apiData = ExampleModule.getApiData();
+		const max = ExampleModule.getMax();
+		return <>
+			<h1>mod --> UI dispatch data: {data}.</h1>
+			<button onClick={() => ExampleModule.testClickHandler()}>click me to test mod --> UI dispatch</button>
+			<h1>mod --> mod dispatch data: {modData}</h1>
+			<button onClick={() => ExampleModule.testModDispatcher()}>click me to test mod --> mod dispatch</button>
+			<div>
+				<button style={{background: '#4e69ab'}} onClick={() => this.uiClickHandler()}>click me to change another component's color</button>
+			</div>
+			<div style={{background: this.col}}>component 2: {this.col}</div>
+			<h1>backend --> ui dispatch data: {apiData}</h1>
+			<button onClick={() => ExampleModule.testBackendDispatcher()}>click me to test api dispatch</button>
+			<div>Max in firestore collection is: {max}</div>
+		</>;
+	}
 
 }

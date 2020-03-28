@@ -17,27 +17,25 @@
  */
 
 import {Module} from "@nu-art/ts-common";
-import {TestDispatch} from "@modules/ExampleModule";
-import {ThunderDispatcher} from "@nu-art/thunderstorm/frontend";
+import {dispatchAll} from "@modules/ExampleModule";
+import {TestDispatch} from "@app/sample-app-shared";
 
 
 export class Test_Class
-    extends Module<{}>
-    implements TestDispatch {
-    modDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
+	extends Module<{}>
+	implements TestDispatch {
 
-    testDispatch = () => {
-    };
+	testDispatch = () => {
+	};
 
-    mod_data: number = 1;
+	mod_data: number = 1;
 
-    getModData = () => this.mod_data;
+	getModData = () => this.mod_data;
 
-    setModData = () => {
-        this.mod_data = 10;
-        this.modDispatcher.dispatchUI([]);
-        this.modDispatcher.dispatchModule([])
-    };
+	setModData = () => {
+		this.mod_data++;
+		dispatchAll()
+	};
 }
 
 export const Test = new Test_Class();

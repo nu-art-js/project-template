@@ -16,25 +16,24 @@
  * limitations under the License.
  */
 import {
-    ApiResponse,
-    ServerApi_Get,
+	ApiResponse,
+	ServerApi_Get,
 } from "@nu-art/thunderstorm/backend";
 
 import * as express from "express";
-import {ExampleModule} from "@modules/ExampleModule";
-import {ExampleApiTest} from "@app/sample-app-shared";
+import {DispatchModule} from "@modules/ExampleModule";
+import {ExampleGetMax} from "@app/sample-app-shared";
 
 class ServerApi_EndpointExample
-    extends ServerApi_Get<ExampleApiTest> {
+	extends ServerApi_Get<ExampleGetMax> {
 
-    constructor() {
-        super("dispatch-endpoint");
-    }
+	constructor() {
+		super("get-max");
+	}
 
-    protected async process(request: express.Request, response: ApiResponse, queryParams: {}, body: void) {
-        const resp = await ExampleModule.getDispatchNumber();
-        return resp;
-    }
+	protected async process(request: express.Request, response: ApiResponse, queryParams: {}, body: void) {
+		return DispatchModule.getMax()
+	}
 }
 
 module.exports = new ServerApi_EndpointExample();
