@@ -22,7 +22,7 @@ import {
 } from "@nu-art/thunderstorm/frontend";
 import * as React from "react";
 import {Second} from "@nu-art/ts-common";
-import {ExampleModule,} from "@modules/ExampleModule";
+import {ExampleModule} from "@modules/ExampleModule";
 import {Test} from "@modules/TestModule";
 import {TestDispatch} from "@app/sample-app-shared";
 

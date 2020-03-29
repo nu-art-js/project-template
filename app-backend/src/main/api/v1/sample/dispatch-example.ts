@@ -32,8 +32,7 @@ class ServerApi_EndpointExample
     }
 
     protected async process(request: express.Request, response: ApiResponse, queryParams: {}, body: void) {
-        const resp = await ExampleModule.getDispatchNumber();
-        return resp;
+        return ExampleModule.getDispatchNumber();
     }
 }
 
