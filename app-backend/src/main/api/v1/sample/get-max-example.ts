@@ -1,5 +1,5 @@
 /*
- * A typescript & react boilerplate with api call example
+ * A backend boilerplate with example apis
  *
  * Copyright (C) 2018  Adam van der Kruk aka TacB0sS
  *
@@ -15,27 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+	ApiResponse,
+	ServerApi_Get,
+} from "@nu-art/thunderstorm/backend";
 
-import {Module} from "@nu-art/ts-common";
-import {dispatchAll} from "@modules/ExampleModule";
-import {TestDispatch} from "@app/sample-app-shared";
+import * as express from "express";
+import {DispatchModule} from "@modules/ExampleModule";
+import {ExampleGetMax} from "@app/sample-app-shared";
 
+class ServerApi_EndpointExample
+	extends ServerApi_Get<ExampleGetMax> {
 
-export class Test_Class
-	extends Module<{}>
-	implements TestDispatch {
+	constructor() {
+		super("get-max");
+	}
 
-	testDispatch = () => {
-	};
-
-	mod_data: number = 1;
-
-	getModData = () => this.mod_data;
-
-	setModData = () => {
-		this.mod_data++;
-		dispatchAll()
-	};
+	protected async process(request: express.Request, response: ApiResponse, queryParams: {}, body: void) {
+		return DispatchModule.getMax()
+	}
 }
 
-export const Test = new Test_Class();
+module.exports = new ServerApi_EndpointExample();
+
+

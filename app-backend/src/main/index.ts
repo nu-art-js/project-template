@@ -24,7 +24,7 @@ import {
 } from "@nu-art/thunderstorm/backend";
 import {Environment} from "./config";
 import {ValueChangedListener} from "@modules/ValueChangedListener";
-import {ExampleModule} from "@modules/ExampleModule";
+import {ExampleModule, DispatchModule} from "@modules/ExampleModule";
 import {Backend_ModulePack_LiveDocs} from "@nu-art/live-docs/backend";
 import {Module} from "@nu-art/ts-common";
 import {Backend_ModulePack_Permissions} from "@nu-art/permissions/backend";
@@ -35,6 +35,7 @@ console.log(`Starting server v${packageJson.version} with env: ${Environment.nam
 const modules: Module[] = [
 	ValueChangedListener,
 	ExampleModule,
+	DispatchModule
 ];
 
 module.exports = new Storm()

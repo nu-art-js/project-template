@@ -16,22 +16,32 @@
  * limitations under the License.
  */
 
-import {Module, Second} from "@nu-art/ts-common";
+import {
+	Module,
+	Second
+} from "@nu-art/ts-common";
 
-import {HttpModule, ThunderDispatcher, ToastModule} from "@nu-art/thunderstorm/frontend";
+import {
+	HttpModule,
+	ThunderDispatcher,
+	ToastModule
+} from "@nu-art/thunderstorm/frontend";
 import {
 	CommonBodyReq,
 	CustomError1,
 	CustomError2,
 	ExampleApiCustomError,
 	ExampleApiGetType,
+	ExampleApiPostType,
 	ExampleApiTest,
-	ExampleApiPostType
+	ExampleGetMax,
+	TestDispatch
 } from "@app/sample-app-shared";
-import {ErrorResponse, HttpMethod} from "@nu-art/thunderstorm";
 import {
-	Test
-} from "@modules/TestModule";
+	ErrorResponse,
+	HttpMethod
+} from "@nu-art/thunderstorm";
+import {Test} from "@modules/TestModule";
 
 type Config = {
 	remoteUrl: string
@@ -41,47 +51,50 @@ export const RequestKey_CustomError = "CustomError";
 export const RequestKey_PostApi = "PostApi";
 export const RequestKey_GetApi = "GetApi";
 export const RequestKey_TestApi = "TestApi";
-
-
-export interface TestDispatch {
-	testDispatch:() => void;
+export const thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
+export const dispatchAll = () => {
+	thunderDispatcher.dispatchUI([]);
+	thunderDispatcher.dispatchModule([])
 }
+
+
 export class ExampleModule_Class
 	extends Module<Config> {
 
 	private message!: string;
-	thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
 	data: string[] = [];
 	api_data: string = 'hi my name is';
+	private max: number = 0;
 
 	callCustomErrorApi() {
-		HttpModule.createRequest<ExampleApiCustomError>(HttpMethod.POST, RequestKey_CustomError)
-		          .setRelativeUrl("/v1/sample/custom-error")
-		          .setOnError((request, resError?: ErrorResponse<CustomError1 | CustomError2>) => {
-			          const error = resError?.error;
-			          if (!error)
-				          return;
+		HttpModule
+			.createRequest<ExampleApiCustomError>(HttpMethod.POST, RequestKey_CustomError)
+			.setRelativeUrl("/v1/sample/custom-error")
+			.setOnError((request, resError?: ErrorResponse<CustomError1 | CustomError2>) => {
+				const error = resError?.error;
+				if (!error)
+					return;
 
-			          const errorType = error.type;
-			          if (!errorType)
-				          return;
+				const errorType = error.type;
+				if (!errorType)
+					return;
 
-			          let errorBody: CustomError1 | CustomError2 | undefined;
-			          switch (errorType) {
-				          case "CustomError1":
-					          errorBody = error.body as CustomError1;
-					          ToastModule.toastError(`${errorBody.prop1}\n${errorBody.prop2}`);
-					          break;
+				let errorBody: CustomError1 | CustomError2 | undefined;
+				switch (errorType) {
+					case "CustomError1":
+						errorBody = error.body as CustomError1;
+						ToastModule.toastError(`${errorBody.prop1}\n${errorBody.prop2}`);
+						break;
 
-				          case "CustomError2":
-					          errorBody = error.body as CustomError2;
-					          ToastModule.toastError(`${errorBody.prop3}\n${errorBody.prop4}`);
-					          break;
-			          }
-		          })
-		          .setOnSuccessMessage(`Success`)
-		          .execute();
+					case "CustomError2":
+						errorBody = error.body as CustomError2;
+						ToastModule.toastError(`${errorBody.prop3}\n${errorBody.prop4}`);
+						break;
+				}
+			})
+			.setOnSuccessMessage(`Success`)
+			.execute();
 
 
 	}
@@ -123,7 +136,7 @@ export class ExampleModule_Class
 	getData = () => this.data;
 
 	setData = () => {
-		this.data = ['hey ','there!'];
+		this.data = ['hey ', 'there!'];
 	};
 
 	getApiData = () => this.api_data;
@@ -132,8 +145,7 @@ export class ExampleModule_Class
 		console.log('testing...');
 		setTimeout(() => {
 			this.setData();
-			this.thunderDispatcher.dispatchUI([]);
-			this.thunderDispatcher.dispatchModule([])
+			dispatchAll()
 		}, 2 * Second)
 	};
 
@@ -146,19 +158,33 @@ export class ExampleModule_Class
 
 	testBackendDispatcher = () => {
 		this.logInfo("passing to server");
-		HttpModule.createRequest<ExampleApiTest>(HttpMethod.GET, RequestKey_TestApi)
+		HttpModule
+			.createRequest<ExampleApiTest>(HttpMethod.GET, RequestKey_TestApi)
 			.setRelativeUrl("/v1/sample/dispatch-endpoint")
 			.setOnError(`Error getting a message from backend`)
 			.execute(async response => {
+				this.fetchMax();
 				console.log("i think i got something...");
 				console.log(response);
 				this.api_data = response;
-				this.thunderDispatcher.dispatchUI([]);
-				this.thunderDispatcher.dispatchModule([])
+				dispatchAll()
 			});
 
 		this.logInfo("continue... will receive an event once request is completed..");
 	}
+
+	fetchMax = () => {
+		HttpModule
+			.createRequest<ExampleGetMax>(HttpMethod.GET, RequestKey_TestApi)
+			.setRelativeUrl("/v1/sample/get-max")
+			.setOnError(`Error getting max from backend`)
+			.execute(async response => {
+				this.max = response.n;
+				dispatchAll()
+			});
+	}
+
+	getMax = () => this.max;
 }
 
 export const ExampleModule = new ExampleModule_Class();
