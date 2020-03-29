@@ -29,7 +29,7 @@ import {
 } from "@modules/TestModule";
 
 export class Page_Test extends BaseComponent
-implements TestDispatch{
+    implements TestDispatch {
     uiDispatcher = new ThunderDispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
     testDispatch = () => {
@@ -49,7 +49,6 @@ implements TestDispatch{
         }, 2 * Second)
     };
 
-
     render() {
         const data = ExampleModule.getData();
         const modData = Test.getModData();
@@ -59,10 +58,14 @@ implements TestDispatch{
             <button onClick={() => ExampleModule.testClickHandler()}>click me to test mod --> UI dispatch</button>
             <h1>mod --> mod dispatch data: {modData}</h1>
             <button onClick={() => ExampleModule.testModDispatcher()}>click me to test mod --> mod dispatch</button>
-            <div><button style={{background:'#4e69ab'}} onClick={() => this.uiClickHandler()}>click me to change another component's color</button></div>
+            <div>
+                <button style={{background: '#4e69ab'}} onClick={() => this.uiClickHandler()}>click me to change another
+                    component's color
+                </button>
+            </div>
             <div style={{background: this.col}}>component 2: {this.col}</div>
             <h1>backend --> ui dispatch data: {apiData}</h1>
-            <button onClick={() => ExampleModule.testBackendDispatcher()}>click me to test api dispatch </button>
+            <button onClick={() => ExampleModule.testBackendDispatcher()}>click me to test api dispatch</button>
         </>;
     }
 
