@@ -29,6 +29,7 @@
   "dependencies": {},
   "devDependencies": {
     "@app/sample-app-shared": "~1.1.0",
+    "@nu-art/bug-report": "~0.20.0",
     "@nu-art/db-api-generator": "~0.20.0",
     "@nu-art/firebase": "~0.20.0",
     "@nu-art/live-docs": "~0.20.0",
