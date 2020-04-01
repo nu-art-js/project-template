@@ -24,11 +24,15 @@ import {
 } from "@nu-art/thunderstorm/backend";
 import {Environment} from "./config";
 import {ValueChangedListener} from "@modules/ValueChangedListener";
-import {ExampleModule} from "@modules/ExampleModule";
+import {
+	DispatchModule,
+	ExampleModule
+} from "@modules/ExampleModule";
 import {Backend_ModulePack_LiveDocs} from "@nu-art/live-docs/backend";
 import {Module} from "@nu-art/ts-common";
 import {Backend_ModulePack_Permissions} from "@nu-art/permissions/backend";
-import {SchedulerExample} from "@modules/SchedulerExample";
+
+const functions = require('firebase-functions');
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
@@ -36,10 +40,11 @@ console.log(`Starting server v${packageJson.version} with env: ${Environment.nam
 const modules: Module[] = [
 	ValueChangedListener,
 	ExampleModule,
-	SchedulerExample
+	// SchedulerExample,
+	DispatchModule
 ];
 
-module.exports = new Storm()
+const _exports = new Storm()
 	.addModules(...Backend_ModulePack_LiveDocs)
 	.addModules(...Backend_ModulePack_Permissions)
 	.addModules(...modules)
@@ -48,3 +53,15 @@ module.exports = new Storm()
 	.setEnvironment(Environment.name)
 	.build();
 
+_exports.logTest = functions.https.onRequest((req: Request, res: Response) => {
+	console.log('LOG_TEST FUNCTION! -- Logging string');
+	console.log({
+		            firstProps: 'String prop',
+		            secondProps: {
+			            a: 'Nested Object Prop',
+			            b: 10000
+		            }
+	            });
+});
+
+module.exports = _exports;

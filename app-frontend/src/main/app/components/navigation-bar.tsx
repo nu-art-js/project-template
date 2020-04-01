@@ -23,6 +23,7 @@ import {css} from "emotion";
 import {Page_ToasterExample} from "../pages/Page_ToasterExample";
 import {Component_Login} from "@nu-art/user-account/frontend";
 import {Page_ApiGen} from "../pages/Page_ApiGen";
+import {Page_Dispatch} from "../pages/Page_Dispatch";
 
 const fixedMenu = css`
   position: fixed;
@@ -51,12 +52,14 @@ export const Route_Dialog = "dialog";
 export const Route_Toaster = "toaster";
 export const Route_Login = "login";
 export const Route_Home = "home";
+export const Route_Dispatch = "test";
 
 const PageLinkKeys = [
 	Route_Home,
 	Route_Login,
 	Route_Dialog,
 	Route_Toaster,
+	Route_Dispatch,
 	Route_ApiGen,
 ];
 
@@ -66,6 +69,7 @@ export const registerRoutes = () => {
 	RoutingModule.addRoute(Route_Dialog, "/dialog", Page_DialogExamples).setLabel("Dialog Examples");
 	RoutingModule.addRoute(Route_Toaster, "/toaster", Page_ToasterExample).setLabel("Toaster Examples");
 	RoutingModule.addRoute(Route_Login, "/login", Component_Login).setLabel("Login");
+	RoutingModule.addRoute(Route_Dispatch, "/dispatch", Page_Dispatch).setLabel("dispatch");
 	RoutingModule.addRoute(Route_Home, "/", Page_Home).setLabel("Home").setExact(false);
 };
 

@@ -15,18 +15,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Module} from "@nu-art/ts-common";
+import {
+	Dispatcher,
+	Module
+} from "@nu-art/ts-common";
+import {TestDispatch} from "@app/sample-app-shared";
+import {FirestoreCollection, FirebaseModule} from "@nu-art/firebase/backend";
+
 
 type Config = {
-	options: string[]
+	options: string[],
+	dispatchNum: string
 }
 
-export class ExampleModule_Class
+class ExampleModule_Class
 	extends Module<Config> {
+	dispatcher = new Dispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
 	getRandomString() {
 		return this.config.options[Math.floor(Math.random() * (this.config.options.length))];
 	}
+
+	async getDispatchNumber() {
+		await this.dispatcher.dispatchModuleAsync([])
+		return this.config.dispatchNum;
+	}
 }
 
+class DispatchModule_Class
+	extends Module<Config>
+	implements TestDispatch {
+	private numbers!: FirestoreCollection<{ n: number }>;
+
+
+	protected init(): void {
+		const firestore = FirebaseModule.createAdminSession().getFirestore();
+		this.numbers = firestore.getCollection<{ n: number }>('test-dispatcher', ({n}) => ({n}));
+	}
+
+	testDispatch = async () => {
+		const max = await this.getMaxImpl();
+		await this.numbers.upsert({n: max + 1});
+	};
+
+	getMax = async () => {
+		const n = await this.getMaxImpl()
+		return {n}
+	};
+
+	private async getMaxImpl() {
+		const data = await this.numbers.getAllDocuments();
+		console.log(data);
+		return data.length > 0 ? Math.max(...data.map(d => d.n)) : 0;
+	}
+}
+export const DispatchModule = new DispatchModule_Class();
 export const ExampleModule = new ExampleModule_Class();

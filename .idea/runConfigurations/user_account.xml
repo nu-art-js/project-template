@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="user-account" type="NodeJSConfigurationType" application-parameters="--service-account=../.trash/test-account.json" node-parameters="--require ts-node/register " path-to-js-file="src/test/test.ts" working-dir="$PROJECT_DIR$/user-account">
+    <method v="2" />
+  </configuration>
+</component>
