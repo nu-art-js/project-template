@@ -1,24 +1,19 @@
 import * as React from 'react';
-import {ReactNode} from "react";
-import {GenericSelect} from "../ui/GenericSelect";
 import {Page_DialogExamples} from "./Page_DialogExamples";
 import {Page_ToasterExample} from "./Page_ToasterExample";
 import {Page_ApiGen} from "./Page_ApiGen";
 import {Hello} from "../Hello";
 import {CustomErrorExample} from './CustomErrorExample';
 import {unitStyle} from "../ui/SelectStyle";
+import {
+	Playground,
+	PlaygroundScreen
+} from "@nu-art/thunderstorm/app-frontend/components/Playground";
 
-type State = {
-	selectedScreen?: PlaygroundScreen;
-}
+const icon__arrowClose = require('@res/images/icon__arrowClose.svg');
+const icon__arrowOpen = require('@res/images/icon__arrowOpen.svg');
 
-type PlaygroundScreen = {
-	name: string
-	getNode: () => ReactNode
-
-}
-
-export class Playground extends React.Component<{}, State> {
+export class SamplePlayground extends React.Component<{}> {
 
 	constructor(props: {}) {
 		super(props);
@@ -26,24 +21,20 @@ export class Playground extends React.Component<{}, State> {
 	}
 
 	render() {
-		return <div className={'ll_v_c match_height match_width'}>
-			<div className='ll_h_c' style={{alignSelf: "start", padding: 20}}>
-				<GenericSelect<PlaygroundScreen>
-					selectedOption={this.state.selectedScreen}
-					options={this.getScreens()}
-					onChange={(screen: PlaygroundScreen) => {
-						this.setState({selectedScreen: screen});
-					}}
-					styles={unitStyle}
-					presentation={(screen) => screen.name}
-				/>
-			</div>
-			{this.state.selectedScreen && this.state.selectedScreen.getNode()}
-		</div>
+		return <Playground selectStyle={unitStyle}
+			            iconClose={icon__arrowClose}
+			            iconOpen={icon__arrowOpen}
+			            screens={this.getScreens()}/>
 	}
 
 	getScreens(): PlaygroundScreen[] {
 		return [
+			{
+				name: "Hello",
+				getNode: () => {
+					return <Hello/>;
+				}
+			},
 			{
 				name: "Dialog Examples",
 				getNode: () => {

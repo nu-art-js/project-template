@@ -11,6 +11,9 @@ export const config = {
 	ExampleModule: {
 		remoteUrl: "/v1/sample/endpoint-example"
 	},
+	ForceUpgrade:{
+		assertVersionUrl: "/v1/version/assert"
+	},
 	LocalizationModule: {
 		defaultLocale: "en",
 		locales: {

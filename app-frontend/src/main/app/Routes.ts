@@ -1,5 +1,5 @@
 import {RoutingModule} from "@nu-art/thunderstorm/frontend";
-import {Playground} from "./pages/Playground";
+import {SamplePlayground} from "./pages/SamplePlayground";
 
 export const Route_Home = "home";
 export const Route_Login = "login";
@@ -9,5 +9,5 @@ export const registerRoutes = () => {
 	RoutingModule.clearRoutes();
 
 	//home route should be declared last
-	RoutingModule.addRoute(Route_Home, "/", Playground).setLabel("Home").setExact(false);
+	RoutingModule.addRoute(Route_Home, "/", SamplePlayground).setLabel("Home").setExact(false);
 };

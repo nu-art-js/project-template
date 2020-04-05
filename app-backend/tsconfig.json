@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": "./src/main",
+    "composite": false,
     "declaration": true,
     "experimentalDecorators": true,
+    "incremental": false,
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": true,
@@ -25,6 +27,7 @@
     "node_modules"
   ],
   "include": [
-    "src/main/**/*.ts"
+    "src/main/**/*.ts",
+    "node_modules/**/*.js"
   ]
 }

@@ -23,7 +23,8 @@ import * as React from 'react';
 import {App} from "./app/App";
 import {
 	Thunder,
-	ToastBuilder
+	ToastBuilder,
+	ForceUpgrade
 } from "@nu-art/thunderstorm/frontend";
 import {
 	Frontend_ModulePack_LiveDocs,
@@ -35,7 +36,7 @@ import {ExampleModule} from "@modules/ExampleModule";
 new Thunder()
 	.setConfig(require("./config").config)
 	.addModules(...Frontend_ModulePack_LiveDocs)
-	.addModules(ExampleModule)
+	.addModules(ForceUpgrade, ExampleModule)
 	.setMainApp(App)
 	.build();
 

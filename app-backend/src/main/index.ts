@@ -20,7 +20,8 @@
 import 'module-alias/register'
 import {
 	RouteResolver,
-	Storm
+	Storm,
+	ForceUpgrade
 } from "@nu-art/thunderstorm/backend";
 import {Environment} from "./config";
 import {ValueChangedListener} from "@modules/ValueChangedListener";
@@ -40,7 +41,8 @@ console.log(`Starting server v${packageJson.version} with env: ${Environment.nam
 const modules: Module[] = [
 	ValueChangedListener,
 	ExampleModule,
-	// SchedulerExample,
+	ForceUpgrade,
+
 	DispatchModule
 ];
 
@@ -53,7 +55,7 @@ const _exports = new Storm()
 	.setEnvironment(Environment.name)
 	.build();
 
-_exports.logTest = functions.https.onRequest((req: Request, res: Response) => {
+_exports.logTest = functions.database.ref('triggerLogs').onWrite(() => {
 	console.log('LOG_TEST FUNCTION! -- Logging string');
 	console.log({
 		            firstProps: 'String prop',
@@ -62,6 +64,6 @@ _exports.logTest = functions.https.onRequest((req: Request, res: Response) => {
 			            b: 10000
 		            }
 	            });
-});
+})
 
 module.exports = _exports;
