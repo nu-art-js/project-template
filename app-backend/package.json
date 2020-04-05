@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@app/sample-app-shared": "file:.dependencies/app-shared",
+    "@nu-art/bug-report": "~0.20.0",
     "@nu-art/db-api-generator": "~0.20.0",
     "@nu-art/firebase": "~0.20.0",
     "@nu-art/live-docs": "~0.20.0",

@@ -43,6 +43,7 @@ import {
 } from "@nu-art/thunderstorm";
 import {Test} from "@modules/TestModule";
 
+
 type Config = {
 	remoteUrl: string
 }
@@ -55,12 +56,9 @@ export const thunderDispatcher = new ThunderDispatcher<TestDispatch, 'testDispat
 export const dispatchAll = () => {
 	thunderDispatcher.dispatchUI([]);
 	thunderDispatcher.dispatchModule([])
-}
-
-
+};
 export class ExampleModule_Class
 	extends Module<Config> {
-
 	private message!: string;
 
 	data: string[] = [];
@@ -95,8 +93,6 @@ export class ExampleModule_Class
 			})
 			.setOnSuccessMessage(`Success`)
 			.execute();
-
-
 	}
 
 	public getMessageFromServer1 = () => {

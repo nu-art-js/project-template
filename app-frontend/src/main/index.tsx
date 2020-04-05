@@ -31,6 +31,11 @@ import {
 	showEditModalExample
 } from "@nu-art/live-docs/frontend";
 import {ExampleModule} from "@modules/ExampleModule";
+import {
+	BeLogged,
+} from "@nu-art/ts-common";
+import {LogClient_BugReport} from "@nu-art/bug-report/frontend";
+import {LogClient_MinBugReport} from "@nu-art/bug-report/frontend";
 
 new Thunder()
 	.setConfig(require("./config").config)
@@ -45,3 +50,6 @@ LiveDocsModule.setActionsResolver((docKey: string) => {
 	return new ToastBuilder().setContent(doc.document.length === 0 ? `No Content for document with key: ${docKey}` : doc.document).setActions(
 		[<button style={{marginRight: 8}} onClick={() => showEditModalExample(docKey)}>Edit for me</button>]);
 });
+
+BeLogged.addClient(LogClient_BugReport);
+BeLogged.addClient(LogClient_MinBugReport);

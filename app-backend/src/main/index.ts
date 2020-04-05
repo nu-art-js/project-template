@@ -28,6 +28,7 @@ import {ExampleModule, DispatchModule} from "@modules/ExampleModule";
 import {Backend_ModulePack_LiveDocs} from "@nu-art/live-docs/backend";
 import {Module} from "@nu-art/ts-common";
 import {Backend_ModulePack_Permissions} from "@nu-art/permissions/backend";
+import {Backend_ModulePack_BugReport} from "@nu-art/bug-report/backend";
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
@@ -41,6 +42,7 @@ const modules: Module[] = [
 module.exports = new Storm()
 	.addModules(...Backend_ModulePack_LiveDocs)
 	.addModules(...Backend_ModulePack_Permissions)
+	.addModules(...Backend_ModulePack_BugReport)
 	.addModules(...modules)
 	.setInitialRouteResolver(new RouteResolver(require, __dirname, "api"))
 	.setInitialRoutePath("/api")

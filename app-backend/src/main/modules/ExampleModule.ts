@@ -55,6 +55,7 @@ class DispatchModule_Class
 
 	testDispatch = async () => {
 		const max = await this.getMaxImpl();
+		console.log(this.numbers);
 		await this.numbers.upsert({n: max + 1});
 	};
 
