@@ -15,6 +15,9 @@ config.ts
 # Backend
 .dependencies
 src/main/config.ts
+database-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Temp?
 src/main/dummy

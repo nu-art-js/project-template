@@ -1,3 +1,5 @@
+import { DB_Object } from "@nu-art/firebase";
+
 export type SubscribeProps = { [prop: string]: string | number };
 
 export type BaseSubscriptionData = {
@@ -9,7 +11,7 @@ export type SubscriptionData = BaseSubscriptionData & {
 	data?: any
 }
 
-export type Request_PushRegister = FirebaseToken & {
+export type Request_PushRegisterClient = FirebaseToken & {
 	subscriptions: BaseSubscriptionData[]
 }
 
@@ -18,6 +20,10 @@ export type DB_PushSession = FirebaseToken & {
 }
 
 export type DB_PushKeys = FirebaseToken & BaseSubscriptionData
+
+export type DB_PushNotification = DB_Object & FirebaseToken & {
+
+}
 
 export type FirebaseToken = {
 	firebaseToken: string

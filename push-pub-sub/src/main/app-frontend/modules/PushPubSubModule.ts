@@ -38,7 +38,7 @@ import {
 	ITP,
 	MessageType,
 	PubSubRegisterClient,
-	Request_PushRegister,
+	Request_PushRegisterClient,
 	SubscribeProps,
 	SubscriptionData
 } from "../../index";
@@ -185,7 +185,7 @@ export class PushPubSubModule_Class
 		if (!this.firebaseToken || this.subscriptions.length === 0)
 			return;
 
-		const body: Request_PushRegister = {
+		const body: Request_PushRegisterClient = {
 			firebaseToken: this.firebaseToken,
 			subscriptions: this.subscriptions.map(({pushKey, props}) => ({pushKey, props}))
 		};
@@ -194,7 +194,7 @@ export class PushPubSubModule_Class
 			this.throttle(() => {
 				HttpModule
 					.createRequest<PubSubRegisterClient>(HttpMethod.POST, 'register-pub-sub-tab')
-					.setRelativeUrl("/v1/push/register")
+					.setRelativeUrl("/v1/push/register-client")
 					.setJsonBody(body)
 					.setOnError(() => ToastModule.toastError("Failed to register for push"))
 					.execute(() => {

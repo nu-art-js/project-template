@@ -40,10 +40,15 @@ import {
 	ISP,
 	ITP,
 	MessageType,
-	Request_PushRegister,
+	Request_PushRegisterClient,
 	SubscribeProps,
 	SubscriptionData
 } from "../../index";
+import {
+	CollectionName_PushNotifications,
+	CollectionName_PushSession,
+	CollectionName_PushTopics
+} from "./_imports";
 
 type Config = {
 	delta_time?: number
@@ -64,13 +69,14 @@ export class PushPubSubModule_Class
 		const session = FirebaseModule.createAdminSession();
 		const firestore = session.getFirestore();
 
-		this.pushSessions = firestore.getCollection<DB_PushSession>('push-sessions', ["firebaseToken"]);
-		this.pushKeys = firestore.getCollection<DB_PushKeys>('push-keys');
+		this.pushSessions = firestore.getCollection<DB_PushSession>(CollectionName_PushSession, ["firebaseToken"]);
+		this.pushKeys = firestore.getCollection<DB_PushKeys>(CollectionName_PushTopics);
+		this.pushNotifications = firestore.getCollection<DB_PushKeys>(CollectionName_PushNotifications);
 
 		this.messaging = session.getMessaging();
 	}
 
-	async register(request: Request_PushRegister) {
+	async register(request: Request_PushRegisterClient) {
 		const session: DB_PushSession = {
 			firebaseToken: request.firebaseToken,
 			timestamp: currentTimeMillies()
@@ -88,11 +94,10 @@ export class PushPubSubModule_Class
 			return sub;
 		});
 
-		return this.pushKeys.runInTransaction(async transaction => {
-			const write = await transaction.delete_Read(this.pushKeys, {where: {firebaseToken: request.firebaseToken}});
-			await transaction.insertAll(this.pushKeys, subscriptions)
-			return write()
-		})
+		await this.pushKeys.runInTransaction(async transaction => {
+			await transaction.delete(this.pushKeys, {where: {firebaseToken: request.firebaseToken}});
+			await transaction.insertAll(this.pushKeys, subscriptions);
+		});
 	}
 
 	async pushToKey<M extends MessageType<any, any, any> = never, S extends string = IFP<M>, P extends SubscribeProps = ISP<M>, D = ITP<M>>(key: S, props?: P, data?: D) {
@@ -115,12 +120,12 @@ export class PushPubSubModule_Class
 
 			carry[db_pushKey.firebaseToken].push(item);
 
-			return carry
+			return carry;
 		}, {} as TempMessages);
 
-		const messages: FirebaseType_Message[] = Object.keys(_messages).map(token => ({token, data: {messages: __stringify(_messages[token])}}))
+		const messages: FirebaseType_Message[] = Object.keys(_messages).map(token => ({token, data: {messages: __stringify(_messages[token])}}));
 		const response: FirebaseType_BatchResponse = await this.messaging.sendAll(messages);
-		return this.cleanUp(response, messages)
+		return this.cleanUp(response, messages);
 	}
 
 	scheduledCleanup = async () => {
@@ -128,7 +133,7 @@ export class PushPubSubModule_Class
 
 		const docs = await this.pushSessions.query({where: {timestamp: {$lt: currentTimeMillies() - delta_time}}});
 
-		return this.cleanUpImpl(docs.map(d => d.firebaseToken))
+		return this.cleanUpImpl(docs.map(d => d.firebaseToken));
 	};
 
 	private cleanUp = async (response: FirebaseType_BatchResponse, messages: FirebaseType_Message[]) => {
@@ -141,10 +146,10 @@ export class PushPubSubModule_Class
 			if (!resp.success && messages[i])
 				carry.push(messages[i].token);
 
-			return carry
+			return carry;
 		}, [] as string[]);
 
-		return this.cleanUpImpl(toDelete)
+		return this.cleanUpImpl(toDelete);
 	};
 
 	private async cleanUpImpl(toDelete: string[]) {
@@ -156,7 +161,7 @@ export class PushPubSubModule_Class
 			this.pushKeys.delete({where: {firebaseToken: {$in: toDelete}}})
 		];
 
-		await Promise.all(async)
+		await Promise.all(async);
 	}
 }
 

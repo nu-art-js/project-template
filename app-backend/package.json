@@ -21,7 +21,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "launch": "tsc --watch & firebase serve --only functions",
+    "launch": "tsc --watch & firebase emulators:start --import=../.trash/data --export-on-exit",
     "lint": "tslint --project './tsconfig.json'",
     "serve": "cd .. && bash ./build-and-install.sh -lb -nb"
   },

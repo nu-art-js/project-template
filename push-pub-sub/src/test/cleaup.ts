@@ -31,7 +31,7 @@ import {
 import {
 	DB_PushKeys,
 	DB_PushSession,
-	Request_PushRegister
+	Request_PushRegisterClient
 } from "../main";
 import {
 	FirestoreCollection,
@@ -41,7 +41,7 @@ import {
 const arrayOf2 = Array(2).fill(0);
 export const scenarioCleanup = __scenario("Scheduled Cleaup");
 
-const testRegister = async function (request: Request_PushRegister, timestamp: number) {
+const testRegister = async function (request: Request_PushRegisterClient, timestamp: number) {
 	const session: DB_PushSession = {
 		firebaseToken: request.firebaseToken,
 		timestamp
