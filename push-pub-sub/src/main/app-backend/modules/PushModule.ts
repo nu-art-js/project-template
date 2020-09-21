@@ -94,6 +94,14 @@ export class PushModule_Class
 
 	async register(token: string, registrationMethod: RegistrationMethod) {
 		const entry = await this.pushRegistry.queryUnique({where: {deviceId: token}});
+
+		switch (registrationMethod) {
+			case RegistrationMethod.Api:
+			case RegistrationMethod.Listener:
+				return this.registerDevice(token, entry);
+		}
+
+
 		if (entry && entry.timestamp + Interval_UpdateUUID > currentTimeMillies()) {
 			const listeningPath = getListeningPath(token, entry.uuid);
 			const _deviceId = await this.db.get<FB_RegistryWrapper>(`${listeningPath}/deviceId`);
@@ -123,17 +131,16 @@ export class PushModule_Class
 		return path;
 	}
 
-	async registerDevice(deviceId: string) {
-		const entry = await this.pushRegistry.queryUnique({where: {deviceId}});
+	async registerDevice(deviceId: string, entry?: (PushRegistry & { uuid: string })) {
 		if (entry && entry.timestamp + Interval_UpdateUUID > currentTimeMillies()) {
-			const listeningPath = getListeningPath(deviceId, entry.uuid);
+			const listeningPath = getListeningPath(entry.deviceId, entry.uuid);
 			const _deviceId = await this.db.get<FB_RegistryWrapper>(`${listeningPath}/deviceId`);
 			if (_deviceId)
 				return listeningPath;
 		}
 
 		if (entry)
-			await this.db.remove(getListeningPath(deviceId, entry.uuid));
+			await this.db.remove(getListeningPath(entry.deviceId, entry.uuid));
 
 		const instance: DB_PushRegistry = {
 			deviceId: deviceId,
