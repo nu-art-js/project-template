@@ -104,7 +104,8 @@ export class PopupMenu
 		const element = this.state?.element;
 		if (!element)
 			return null;
-//tree instead of menu component
+
+		//tree instead of menu component
 		return <div style={{position: "absolute"}}>
 			<div id="overlay" ref={this.overlayRef} style={overlayStyle}>
 				<div style={this.style(element.pos, element.css)}>
@@ -125,7 +126,6 @@ export class PopupMenu
 		if (!_current)
 			return;
 
-		// _current.addEventListener("mousedown", this.stopClickCascading, false);
 		_current.addEventListener("mousedown", this.closeMenu, false);
 	};
 };

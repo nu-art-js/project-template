@@ -33,8 +33,10 @@
       "port": "5009"
     },
     "database": {
+      "port": "5002"
     },
     "firestore": {
+      "port": "5003"
     }
   }
 }

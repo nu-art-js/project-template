@@ -45,7 +45,6 @@ import {
 	SubscriptionData
 } from "../../index";
 import {
-	CollectionName_PushNotifications,
 	CollectionName_PushSession,
 	CollectionName_PushTopics
 } from "./_imports";
@@ -65,15 +64,16 @@ export class PushPubSubModule_Class
 	private pushKeys!: FirestoreCollection<DB_PushKeys>;
 	private messaging!: PushMessagesWrapper;
 
+	// private pushNotifications!: FirestoreCollection<DB_PushNotification>;
+
 	protected init(): void {
 		const session = FirebaseModule.createAdminSession();
 		const firestore = session.getFirestore();
+		this.messaging = session.getMessaging();
 
 		this.pushSessions = firestore.getCollection<DB_PushSession>(CollectionName_PushSession, ["firebaseToken"]);
 		this.pushKeys = firestore.getCollection<DB_PushKeys>(CollectionName_PushTopics);
-		this.pushNotifications = firestore.getCollection<DB_PushKeys>(CollectionName_PushNotifications);
-
-		this.messaging = session.getMessaging();
+		// this.pushNotifications = firestore.getCollection<DB_PushNotification>(CollectionName_PushNotifications, ["_id"]);
 	}
 
 	async register(request: Request_PushRegisterClient) {
@@ -100,7 +100,7 @@ export class PushPubSubModule_Class
 		});
 	}
 
-	async pushToKey<M extends MessageType<any, any, any> = never, S extends string = IFP<M>, P extends SubscribeProps = ISP<M>, D = ITP<M>>(key: S, props?: P, data?: D) {
+	async pushToKey<M extends MessageType<any, any, any> = never, S extends string = IFP<M>, P extends SubscribeProps = ISP<M>, D = ITP<M>>(key: S, props?: P, data?: D, persistent?: boolean) {
 		let docs = await this.pushKeys.query({where: {pushKey: key}});
 		if (props)
 			docs = docs.filter(doc => !doc.props || compare(doc.props, props));

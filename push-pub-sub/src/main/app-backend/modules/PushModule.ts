@@ -35,6 +35,11 @@ import {
 	Request_ResultPush,
 	ResultPush
 } from "../../shared/push";
+import {
+	CollectionNam_PubSubProcessedMessages,
+	CollectionNam_PubSubQueue,
+	CollectionNam_PubSubRegistry
+} from "./_imports";
 
 type Config = {}
 
@@ -65,6 +70,11 @@ const getListeningPath = (sha: string, uuid: string) => `${Path_Push}/${sha}/${u
 
 const Interval_UpdateUUID = 2 * Day;
 
+export enum RegistrationMethod {
+	Listener,
+	Api
+}
+
 export class PushModule_Class
 	extends Module<Config> {
 
@@ -77,9 +87,40 @@ export class PushModule_Class
 		const session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
 		const firestore = session.getFirestore();
-		this.pushRegistry = firestore.getCollection<DB_PushRegistry>("android-push-registry", ["deviceId"]);
-		this.pushQueue = firestore.getCollection<DB_PushMessage>("android-push-queue", ["mId"]);
-		this.processedPushMessages = firestore.getCollection<DB_PushMessage>("android-processed-push-messages", ["mId"]);
+		this.pushRegistry = firestore.getCollection<DB_PushRegistry>(CollectionNam_PubSubRegistry, ["deviceId"]);
+		this.pushQueue = firestore.getCollection<DB_PushMessage>(CollectionNam_PubSubQueue, ["mId"]);
+		this.processedPushMessages = firestore.getCollection<DB_PushMessage>(CollectionNam_PubSubProcessedMessages, ["mId"]);
+	}
+
+	async register(token: string, registrationMethod: RegistrationMethod) {
+		const entry = await this.pushRegistry.queryUnique({where: {deviceId: token}});
+		if (entry && entry.timestamp + Interval_UpdateUUID > currentTimeMillies()) {
+			const listeningPath = getListeningPath(token, entry.uuid);
+			const _deviceId = await this.db.get<FB_RegistryWrapper>(`${listeningPath}/deviceId`);
+			if (_deviceId)
+				return listeningPath;
+		}
+
+		if (entry)
+			await this.db.remove(getListeningPath(token, entry.uuid));
+
+		const instance: DB_PushRegistry = {
+			deviceId: token,
+			uuid: generateHex(32),
+			timestamp: currentTimeMillies()
+		};
+
+		const obj: FB_RegistryWrapper = {
+			deviceId: instance.deviceId,
+			timestamp: instance.timestamp,
+		};
+
+		await this.pushRegistry.upsert(instance);
+
+		const path = getListeningPath(token, instance.uuid);
+		await this.db.set<FB_RegistryWrapper>(path, obj);
+
+		return path;
 	}
 
 	async registerDevice(deviceId: string) {
@@ -144,7 +185,7 @@ export class PushModule_Class
 	async sendNextPush(deviceId: string, uuid: string, registryWrapper: FB_RegistryWrapper) {
 		const messageQueue = await this.pushQueue.query({where: {deviceId: deviceId}, orderBy: [{key: "timestamp", order: "desc"}], limit: 1});
 		if (messageQueue.length === 0)
-			// await this.pushDatabase.remove(`${getListeningPath(deviceId, uuid)}/mId`);
+		// await this.pushDatabase.remove(`${getListeningPath(deviceId, uuid)}/mId`);
 			return this.logDebug(`Nothing to push for:\n Device: ${deviceId}\n uuid: ${uuid}`);
 
 		const nextMessage = messageQueue[0];
@@ -154,7 +195,7 @@ export class PushModule_Class
 		registryWrapper.data = nextMessage.data;
 		registryWrapper.mId = nextMessage.mId;
 		await this.db.set<FB_RegistryWrapper>(getListeningPath(deviceId, uuid), registryWrapper);
-		return registryWrapper
+		return registryWrapper;
 	}
 
 	private async getPushRegistry(deviceId: string): Promise<DB_PushRegistry> {
@@ -163,7 +204,7 @@ export class PushModule_Class
 		if (!pushRegistry)
 			throw new ApiException(404, `Could not find pushRegistry for device id: ${deviceId}`);
 
-		return pushRegistry
+		return pushRegistry;
 	}
 
 	private async assertIntegrityAndPush(_registryWrapper: FB_RegistryWrapper, pushRegistry: DB_PushRegistry) {
@@ -186,7 +227,7 @@ export class PushModule_Class
 				...body.pushResult,
 				serverTimestamp: currentTimeMillies()
 			}
-		}
+		};
 		await this.processedPushMessages.patch(message as Subset<DB_PushMessage>);
 	}
 }
