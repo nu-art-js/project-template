@@ -36,6 +36,7 @@
     "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
+    "@nu-art/db-api-generator": "~0.0.1",
     "@nu-art/firebase": "~0.0.1",
     "@nu-art/storm": "~0.0.1",
     "@nu-art/testelot": "~0.0.1",

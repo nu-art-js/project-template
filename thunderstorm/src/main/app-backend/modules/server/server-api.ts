@@ -79,6 +79,7 @@ export abstract class ServerApi<Binder extends ApiTypeBinder<string, R, B, P>, R
 	readonly headersToLog: string[] = [];
 
 	private readonly method: HttpMethod;
+	private url!: string;
 	private readonly relativePath: string;
 	private middlewares?: ServerApi_Middleware[];
 	private bodyValidator?: ValidatorTypeResolver<B>;
@@ -112,6 +113,10 @@ export abstract class ServerApi<Binder extends ApiTypeBinder<string, R, B, P>, R
 		this.queryValidator = queryValidator;
 	}
 
+	getUrl() {
+		return this.url;
+	}
+
 	dontPrintResponse() {
 		// @ts-ignore
 		this.printResponse = false;
@@ -126,6 +131,7 @@ export abstract class ServerApi<Binder extends ApiTypeBinder<string, R, B, P>, R
 		const fullPath = `${prefixUrl ? prefixUrl : ""}${this.relativePath}`;
 		this.setTag(fullPath);
 		router[this.method](fullPath, this.call);
+		this.url = `${HttpServer.getBaseUrl()}${fullPath}`;
 	}
 
 	assertProperty = assertProperty;

@@ -57,6 +57,7 @@ import {
 import {AccessLevelPermissionsDB} from "./managment";
 import {FirestoreTransaction} from "@nu-art/firebase/backend";
 import {PermissionsShare} from "../permissions-share";
+import { UI_Account } from "@nu-art/user-account";
 
 const validateUserUuid = validateRegexp(/^.{0,50}$/);
 const validateGroupLabel = validateRegexp(/^[A-Za-z-\._ ]+$/);
@@ -218,12 +219,12 @@ export class UsersDB_Class
 		}
 	}
 
-	async __onUserLogin(email: string) {
-		await this.insertIfNotExist(email);
+	async __onUserLogin(account: UI_Account) {
+		await this.insertIfNotExist(account.email);
 	}
 
-	async __onNewUserRegistered(email: string) {
-		await this.insertIfNotExist(email);
+	async __onNewUserRegistered(account: UI_Account) {
+		await this.insertIfNotExist(account.email);
 	}
 
 	async insertIfNotExist(email: string) {

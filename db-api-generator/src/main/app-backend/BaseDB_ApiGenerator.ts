@@ -59,13 +59,12 @@ import {
 	FirestoreInterface,
 	FirestoreTransaction,
 } from "@nu-art/firebase/backend";
-import {
-	BadInputErrorBody,
-	ErrorKey_BadInput
-} from "../index";
+import {BadInputErrorBody, ErrorKey_BadInput } from "../shared/types";
 
 const idLength = 32;
 export const validateId = (length: number, mandatory: boolean = true) => validateRegexp(new RegExp(`^[0-9a-f]{${length}}$`), mandatory);
+export const validateEmail = validateRegexp(
+	/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/);
 export const validateUniqueId = validateId(idLength);
 export const validateOptionalId = validateId(idLength, false);
 export const validateStringWithDashes = validateRegexp(/^[A-Za-z-]+$/);
@@ -418,7 +417,7 @@ export abstract class BaseDB_ApiGenerator<DBType extends DB_Object, ConfigType e
 
 		const processor = async (_transaction: FirestoreTransaction) => {
 			const write = await this.deleteUnique_Read(_id, _transaction, request);
-			if(!write)
+			if (!write)
 				throw new ApiException(404, `Could not find ${this.config.itemName} with unique id: ${_id}`);
 
 			return write();

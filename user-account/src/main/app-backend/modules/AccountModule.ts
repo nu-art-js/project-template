@@ -24,6 +24,7 @@ import {
 	generateHex,
 	hashPasswordWithSalt,
 	Module,
+	validate,
 	__stringify
 } from "@nu-art/ts-common";
 
@@ -46,6 +47,7 @@ import {
 	ExpressRequest,
 	HeaderKey
 } from "@nu-art/thunderstorm/backend";
+import {validateEmail} from "@nu-art/db-api-generator/backend";
 
 export const Header_SessionId = new HeaderKey(HeaderKey_SessionId);
 
@@ -57,15 +59,20 @@ export const Collection_Sessions = "user-account--sessions";
 export const Collection_Accounts = "user-account--accounts";
 
 export interface OnNewUserRegistered {
-	__onNewUserRegistered(email: string): void;
+	__onNewUserRegistered(account: UI_Account): void;
 }
 
 export interface OnUserLogin {
-	__onUserLogin(email: string): void;
+	__onUserLogin(account: UI_Account): void;
 }
 
 const dispatch_onUserLogin = new Dispatcher<OnUserLogin, "__onUserLogin">("__onUserLogin");
 const dispatch_onNewUserRegistered = new Dispatcher<OnNewUserRegistered, "__onNewUserRegistered">("__onNewUserRegistered");
+
+function getUIAccount(account: DB_Account): UI_Account {
+	const {email, _id} = account;
+	return {email, _id};
+}
 
 export class AccountsModule_Class
 	extends Module<Config> {
@@ -98,15 +105,16 @@ export class AccountsModule_Class
 	}
 
 	async create(request: Request_CreateAccount) {
-		await this.createAccount(request);
+		const account = await this.createAccount(request);
 
-		await dispatch_onNewUserRegistered.dispatchModuleAsync([request.email]);
-
-		return this.login(request);
+		const session = await this.login(request);
+		await dispatch_onNewUserRegistered.dispatchModuleAsync([getUIAccount(account)]);
+		return session;
 	}
 
 	async createAccount(request: Request_CreateAccount) {
 		request.email = request.email.toLowerCase();
+		validate(request.email, validateEmail);
 
 		return this.accounts.runInTransaction(async (transaction) => {
 			let account = await transaction.queryUnique(this.accounts, {where: {email: request.email}});
@@ -144,28 +152,31 @@ export class AccountsModule_Class
 			await this.accounts.upsert(account);
 		}
 
-		await dispatch_onUserLogin.dispatchModuleAsync([request.email]);
-		return this.upsertSession(account._id);
+		const session = await this.upsertSession(account._id);
+
+		await dispatch_onUserLogin.dispatchModuleAsync([getUIAccount(account)]);
+		return session;
 	}
 
-	async loginSAML(_email: string): Promise<Response_Auth> {
-		const email = _email.toLowerCase();
-		const account = await this.createSAML(email);
+	async loginSAML(__email: string): Promise<Response_Auth> {
+		const _email = __email.toLowerCase();
+		const account = await this.createSAML(_email);
 
-		await dispatch_onUserLogin.dispatchModuleAsync([email]);
-		return this.upsertSession(account._id);
+		const session = await this.upsertSession(account._id);
+		await dispatch_onUserLogin.dispatchModuleAsync([getUIAccount(account)]);
+		return session;
 	}
 
-	private async createSAML(_email: string) {
-		const email = _email.toLowerCase();
-		const query = {where: {email}};
+	private async createSAML(__email: string) {
+		const _email = __email.toLowerCase();
+		const query = {where: {email: _email}};
 		const account = await this.accounts.runInTransaction(async (transaction) => {
 			let _account = await transaction.queryUnique(this.accounts, query);
 			if (!_account) {
 				_account = {
 					_id: generateHex(32),
-					_audit: auditBy(email),
-					email,
+					_audit: auditBy(_email),
+					email: _email,
 				};
 
 				await transaction.insert(this.accounts, _account);
@@ -179,7 +190,7 @@ export class AccountsModule_Class
 			return _account;
 		});
 
-		await dispatch_onNewUserRegistered.dispatchModuleAsync([email]);
+		await dispatch_onNewUserRegistered.dispatchModuleAsync([getUIAccount(account)]);
 		return account;
 	}
 
@@ -211,8 +222,7 @@ export class AccountsModule_Class
 			throw new ApiException(403, `No user found for session: ${__stringify(session)}`);
 		}
 
-		const {email, _id} = account;
-		return {email, _id};
+		return getUIAccount(account);
 	}
 
 	private TTLExpired = (session: DB_Session) => {
@@ -234,6 +244,8 @@ export class AccountsModule_Class
 		const account = await this.getUserEmailFromSession(session);
 		return {sessionId: session.sessionId, email: account.email};
 	};
+
 }
+
 
 export const AccountModule = new AccountsModule_Class();

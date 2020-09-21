@@ -344,7 +344,7 @@ export class RouteResolver {
 				return;
 			}
 
-			if (file.includes("test.ts.js"))
+			if (file.endsWith(".d.ts"))
 				return;
 
 			if (!file.endsWith(".js"))

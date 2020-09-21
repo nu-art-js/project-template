@@ -46,6 +46,8 @@ export type ObjectTS = { [s: string]: any };
 
 export type TypedMap<ValueType> = { [s: string]: ValueType };
 
+export type DB_Object = { _id: string }
+
 export type Auditable = {
 	_audit?: AuditBy;
 };

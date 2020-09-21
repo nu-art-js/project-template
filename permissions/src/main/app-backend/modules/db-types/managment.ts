@@ -218,6 +218,7 @@ export class LevelDB_Class
 
 export class ApiDB_Class
 	extends BaseDB_ApiGenerator<DB_PermissionApi> {
+
 	static _validator: TypeValidator<DB_PermissionApi> = {
 		_id: validateOptionalId,
 		projectId: validateProjectId,
