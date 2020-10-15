@@ -29,10 +29,16 @@ export class MyTester
 	extends AppTester {
 
 	prepare() {
-		FirebaseModule_Class.localAdminConfigId = "test-permissions";
+		// FirebaseModule_Class.localAdminConfigId = "test-permissions";
 
-		const serviceAccount = this.resolveServiceAccount();
-
+		// const serviceAccount = this.resolveServiceAccount();
+		const serviceAccount = {
+			// project_id: 'test',
+			// client_email: 'fake_email',
+			// private_key: 'fake_key'
+			databaseURL: "http://localhost:5002"
+		};
+		// @ts-ignore
 		FirebaseModule.setDefaultConfig({"test-permissions": serviceAccount});
 	}
 

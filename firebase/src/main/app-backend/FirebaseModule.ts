@@ -21,10 +21,9 @@
  */
 
 import {
-	BadImplementationException,
+	_keys,
 	ImplementationMissingException,
 	Module,
-	_keys,
 	moduleResolver,
 	ThisShouldNotHappenException
 } from "@nu-art/ts-common";
@@ -53,12 +52,11 @@ export class FirebaseModule_Class
 		super("firebase");
 	}
 
-	protected init(): void {
-		this.localProjectId = this.deriveLocalProjectId();
-	}
-
 	getLocalProjectId(): string {
-		return this.localProjectId;
+		if (this.localProjectId)
+			return this.localProjectId;
+
+		return this.localProjectId = this.deriveLocalProjectId();
 	}
 
 	private deriveLocalProjectId(): string {
@@ -137,8 +135,8 @@ export class FirebaseModule_Class
 		if (typeof config === "string")
 			config = JSON.parse(readFileSync(config, "utf8")) as JWTInput;
 
-		if (!config || !config.client_email || !config.private_key)
-			throw new BadImplementationException(`Config for key ${projectId} is not an Admin credentials pattern`);
+		// if (!config || !config.client_email || !config.private_key)
+		// 	throw new BadImplementationException(`Config for key ${projectId} is not an Admin credentials pattern`);
 
 		session = new FirebaseSession_Admin(projectId, config);
 		this.adminSessions[projectId] = session;

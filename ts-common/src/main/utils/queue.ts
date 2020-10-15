@@ -67,7 +67,7 @@ export class Queue
 		this.execute();
 	}
 
-	ignore = (params: any) => {
+	ignore = () => {
 	};
 
 	execute() {

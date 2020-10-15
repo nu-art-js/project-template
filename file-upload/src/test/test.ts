@@ -17,14 +17,22 @@
  * limitations under the License.
  */
 
-import {__scenario} from "@nu-art/testelot";
+import {
+	__custom,
+	__scenario
+} from "@nu-art/testelot";
 import {FirebaseModule} from "@nu-art/firebase/backend";
-import {parseApk} from "./apk-parsing/parse";
 import {MyTester} from "./core";
 
 
 const mainScenario = __scenario("File Uploading Testing");
 // mainScenario.add(parseApk);
+mainScenario.add(__custom(async () => {
+	// @ts-ignore
+	const db = await FirebaseModule.createLocalAdminSession().getDatabase();
+	const resp = await db.get('/');
+	console.log(resp);
+}).setLabel('Parse Apk'));
 
 module.exports = new MyTester()
 	.addModules(FirebaseModule)
