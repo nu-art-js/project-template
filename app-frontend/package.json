@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@app/app-shared": "~0.0.1",
+    "@babel/core": "^7.11.6",
     "@nu-art/bug-report": "~0.0.1",
     "@nu-art/db-api-generator": "~0.0.1",
     "@nu-art/file-upload": "~0.0.1",
@@ -88,9 +89,9 @@
     "type-fest": "^0.18.0",
     "typescript": "^3.8.3",
     "url-loader": "^1.1.1",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.1.1",
-    "webpack-dev-server": "^3.1.9",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
     "webpack-md5-hash": "0.0.6",
     "write-file-webpack-plugin": "^4.4.1"
   }

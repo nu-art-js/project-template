@@ -83,8 +83,12 @@ module.exports = (env, argv) => {
 		module: {
 			rules: [
 				isDevelopment && {
-					loader: 'babel-loader',
-					options: { plugins: ['react-refresh/babel'] },
+					test: /sw\/.+\.ts$/,
+					include: [swFolder],
+					use: {
+						loader: 'babel-loader',
+						options: {plugins: ['react-refresh/babel']}
+					}
 				},
 				{
 					test: /sw\/.+\.ts$/,
