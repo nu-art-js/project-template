@@ -22,7 +22,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Router} from 'react-router-dom';
-import {hot} from 'react-hot-loader';
+// import {hot} from 'react-hot-loader';
 // noinspection TypeScriptPreferShortImport`
 import {BrowserHistoryModule} from "../modules/HistoryModule";
 import {Thunder} from "./Thunder";
@@ -30,7 +30,8 @@ import {ImplementationMissingException} from "@nu-art/ts-common";
 
 
 export type WrapperProps = {}
-export const AppWrapper = hot(module)((props: WrapperProps) => {
+// export const AppWrapper = hot(module)((props: WrapperProps) => {
+export const AppWrapper = (props: WrapperProps) => {
 
 	const MainApp = Thunder.getInstance().getMainApp();
 	if (!MainApp)
@@ -40,7 +41,8 @@ export const AppWrapper = hot(module)((props: WrapperProps) => {
 		<Router history={BrowserHistoryModule.getHistory()}>
 			<MainApp/>
 		</Router>)
-});
+// });
+};
 
 export function renderApp(appId: string = "app") {
 	ReactDOM.render(

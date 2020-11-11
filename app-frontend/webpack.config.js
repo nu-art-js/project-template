@@ -24,11 +24,15 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const WriteFilePlugin = require('write-file-webpack-plugin');
 const packageJson = require('./package.json');
 const webpack = require("webpack");
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const sourcePath = path.join(__dirname, './src');
 const swFolder = path.join(__dirname, './src/sw/');
 const swConfig = path.join(__dirname, './src/sw/tsconfig.json');
 const mainFolder = path.join(__dirname, './src/main/');
 const mainConfig = path.join(__dirname, './src/main/tsconfig.json');
+
+const isDevelopment = true;
+// const isDevelopment = process.env.NODE_ENV !== 'production';
 
 module.exports = (env, argv) => {
 
@@ -53,6 +57,9 @@ module.exports = (env, argv) => {
 		devtool: "source-map",
 
 		devServer: {
+			// hot: true,
+			// hotOnly: true,
+			// hmr: true,
 			historyApiFallback: true,
 			compress: true,
 			https: !argv.ssl ? undefined : envConfig.getDevServerSSL(),
@@ -75,6 +82,10 @@ module.exports = (env, argv) => {
 
 		module: {
 			rules: [
+				isDevelopment && {
+					loader: 'babel-loader',
+					options: { plugins: ['react-refresh/babel'] },
+				},
 				{
 					test: /sw\/.+\.ts$/,
 					include: [swFolder],
@@ -167,6 +178,8 @@ module.exports = (env, argv) => {
 			// new WebpackMd5Hash(),
 			envConfig.getPrettifierPlugin(),
 			new WriteFilePlugin(),
+			isDevelopment && new webpack.HotModuleReplacementPlugin(),
+			isDevelopment && new ReactRefreshWebpackPlugin(),
 		].filter(plugin => plugin),
 
 	};
