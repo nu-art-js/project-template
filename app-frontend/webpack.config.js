@@ -61,9 +61,6 @@ module.exports = (env, argv) => {
 
 		devServer: {
 			hot: true,
-			// inline: true,
-			// liveReload: false,
-			// hotOnly: false,
 			historyApiFallback: true,
 			compress: true,
 			https: envConfig.getDevServerSSL(),
