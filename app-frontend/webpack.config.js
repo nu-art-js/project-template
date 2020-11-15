@@ -31,14 +31,17 @@ const swConfig = path.join(__dirname, './src/sw/tsconfig.json');
 const mainFolder = path.join(__dirname, './src/main/');
 const mainConfig = path.join(__dirname, './src/main/tsconfig.json');
 
-const isDevelopment = true;
-// const isDevelopment = process.env.NODE_ENV !== 'production';
+// const isDevelopment = true;
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const reactRefreshWebpackPlugin = new ReactRefreshWebpackPlugin();
+reactRefreshWebpackPlugin.options.overlay = false;
 
 module.exports = (env, argv) => {
 
 	const envConfig = require(`./_config/${env}`);
 
 	console.log("env: " + env);
+
 	console.log("argv: " + JSON.stringify(argv));
 	console.log("argv.mode: " + argv.mode);
 	const outputFolder = path.resolve(__dirname, `dist/${envConfig.outputFolder()}`);
@@ -57,12 +60,13 @@ module.exports = (env, argv) => {
 		devtool: "source-map",
 
 		devServer: {
-			// hot: true,
-			// hotOnly: true,
-			// hmr: true,
+			hot: true,
+			// inline: true,
+			// liveReload: false,
+			// hotOnly: false,
 			historyApiFallback: true,
 			compress: true,
-			https: !argv.ssl ? undefined : envConfig.getDevServerSSL(),
+			https: envConfig.getDevServerSSL(),
 			port: envConfig.getHostingPort(),
 		},
 
@@ -83,8 +87,8 @@ module.exports = (env, argv) => {
 		module: {
 			rules: [
 				isDevelopment && {
-					test: /sw\/.+\.ts$/,
-					include: [swFolder],
+					test: /main\/.+\.tsx?$/,
+					include: [mainFolder],
 					use: {
 						loader: 'babel-loader',
 						options: {plugins: ['react-refresh/babel']}
@@ -106,7 +110,8 @@ module.exports = (env, argv) => {
 					use: {
 						loader: "awesome-typescript-loader",
 						options: {
-							configFileName: mainConfig
+							configFileName: mainConfig,
+							forceIsolatedModules: true
 						}
 					}
 				},
@@ -182,8 +187,8 @@ module.exports = (env, argv) => {
 			// new WebpackMd5Hash(),
 			envConfig.getPrettifierPlugin(),
 			new WriteFilePlugin(),
-			isDevelopment && new webpack.HotModuleReplacementPlugin(),
-			isDevelopment && new ReactRefreshWebpackPlugin(),
+			// isDevelopment && new webpack.HotModuleReplacementPlugin(),
+			isDevelopment && reactRefreshWebpackPlugin,
 		].filter(plugin => plugin),
 
 	};
