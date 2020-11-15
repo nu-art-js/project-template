@@ -61,9 +61,7 @@ export type Response_LoginSAML = {
 	loginUrl: string
 };
 
-export type Response_Validation = {
-	email: string
-};
+export type Response_Validation = UI_Account
 
 export type UI_Account = { email: string; _id: string }
 

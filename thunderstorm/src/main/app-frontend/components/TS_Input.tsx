@@ -49,7 +49,7 @@ type State = {
 }
 const MIN_DELTA = 200;
 
-export class TS_Input<Key extends string= string>
+export class TS_Input<Key extends string = string>
 	extends React.Component<TS_InputProps<Key>, State> {
 
 	private ref?: HTMLInputElement | null;
@@ -79,12 +79,12 @@ export class TS_Input<Key extends string= string>
 		if (props.id === state.id && state.name === props.name && state.initialValue === props.value)
 			return {value: state.value};
 
-		return TS_Input.getInitialState(props)
+		return TS_Input.getInitialState(props);
 	}
 
 
 	componentWillUnmount(): void {
-		this.ref?.removeEventListener('keydown', this.props.handleKeyEvent || this.handleKeyEvent)
+		this.ref?.removeEventListener('keydown', this.props.handleKeyEvent || this.handleKeyEvent);
 	}
 
 	private handleKeyEvent = (ev: KeyboardEvent) => {

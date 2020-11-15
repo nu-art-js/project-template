@@ -49,6 +49,7 @@ import {PermissionsModule} from "./PermissionsModule";
 export type UserCalculatedAccessLevel = { [domainId: string]: number };
 export type GroupPairWithBaseLevelsObj = { accessLevels: Base_AccessLevels[], customFields: StringMap[] };
 export type RequestPairWithLevelsObj = { accessLevels: DB_PermissionAccessLevel[], customFields: StringMap[] };
+
 type Config = {
 	strictMode?: boolean
 }

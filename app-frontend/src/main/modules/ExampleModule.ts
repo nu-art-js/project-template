@@ -45,6 +45,7 @@ import {
 } from "@nu-art/thunderstorm";
 import {Test} from "@modules/TestModule";
 import {
+	OnNotificationsReceived,
 	OnPushMessageReceived,
 	PushPubSubModule
 } from "@nu-art/push-pub-sub/frontend";
@@ -80,7 +81,7 @@ const mySubscriptions: BaseSubscriptionData[] = [{
 
 export class ExampleModule_Class
 	extends Module<Config>
-	implements OnPushMessageReceived {
+	implements OnPushMessageReceived, OnNotificationsReceived {
 
 	private message!: string;
 
@@ -93,7 +94,6 @@ export class ExampleModule_Class
 			const asyncs: Promise<any>[] = [
 				PushPubSubModule.subscribeMulti(mySubscriptions),
 				this.initAnalytics()
-
 			];
 			return Promise.all(asyncs);
 		});
@@ -109,6 +109,10 @@ export class ExampleModule_Class
 		const message = `You got data! pushKey: ${pushKey}, props: ${__stringify(props)} with data: ${__stringify(data)}`;
 		// ToastModule.toastSuccess(message);
 		this.logInfo('payload received in module', message);
+	}
+
+	__onNotificationsReceived(): void {
+		this.logInfo('these are the notifications you actually care about:' + __stringify(PushPubSubModule.getNotifications()));
 	}
 
 	callCustomErrorApi() {

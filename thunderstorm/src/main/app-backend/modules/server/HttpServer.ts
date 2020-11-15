@@ -31,6 +31,7 @@ import * as fs from "fs";
 import {
 	addAllItemToArray,
 	addItemToArray,
+	LogLevel,
 	Module
 } from "@nu-art/ts-common";
 import {
@@ -115,6 +116,7 @@ export class HttpServer_Class
 	}
 
 	protected async init() {
+		this.setMinLevel(ServerApi.isDebug? LogLevel.Verbose:LogLevel.Info)
 		const baseUrl = this.config.baseUrl;
 		if (baseUrl) {
 			if (baseUrl.endsWith("/"))
@@ -183,7 +185,7 @@ export class HttpServer_Class
 	}
 
 	public printRoutes(prefix: string): void {
-		this.routes.forEach(route => this.logInfo(`${JSON.stringify(route.methods)} ${prefix}${route.path}`));
+		this.routes.forEach(route => this.logDebug(`${JSON.stringify(route.methods)} ${prefix}${route.path}`));
 	}
 
 	private createServer(): Server {

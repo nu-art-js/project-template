@@ -40,7 +40,7 @@ export abstract class Module<Config = any>
 	protected readonly initiated = false;
 	protected readonly config: Config = {} as Config;
 	protected readonly configValidator?: ValidatorTypeResolver<Config>;
-	private timeoutMap: { [k: string]: number } = {};
+	protected timeoutMap: { [k: string]: number } = {};
 
 	// noinspection TypeScriptAbstractClassConstructorCanBeMadeProtected
 	constructor(tag?: string) {

@@ -21,16 +21,19 @@
 import {
 	ImplementationMissingException,
 	Module,
-    ObjectTS
+	ObjectTS
 } from "@nu-art/ts-common";
 
 import {
-	ServerApi_Middleware,
-	HeaderKey
+	HeaderKey,
+	ServerApi_Middleware
 } from "../server/HttpServer";
 import {ApiException} from "../../exceptions";
 import {HttpRequestData} from "../server/server-api";
-import {ExpressRequest} from "../../utils/types";
+import {
+	ExpressRequest,
+	QueryRequestInfo
+} from "../../utils/types";
 
 type ProxyConfig = {
 	extras?: ObjectTS
@@ -46,9 +49,24 @@ export type RemoteProxyConfig = {
 }
 
 export class RemoteProxy_Class<Config extends RemoteProxyConfig>
-	extends Module<Config> {
+	extends Module<Config>
+	implements QueryRequestInfo {
 
-	readonly Middleware: ServerApi_Middleware = async (request: ExpressRequest) => {RemoteProxy.assertSecret(request)};
+	async __queryRequestInfo(request: ExpressRequest): Promise<{ key: string; data: any; }> {
+		let data: string | undefined;
+		try {
+			data = this.proxyHeader.get(request);
+		} catch (e) {
+		}
+		return {
+			key: this.getName(),
+			data
+		};
+	}
+
+	readonly Middleware: ServerApi_Middleware = async (request: ExpressRequest) => {
+		RemoteProxy.assertSecret(request);
+	};
 	private secretHeader!: HeaderKey;
 	private proxyHeader!: HeaderKey;
 
@@ -91,7 +109,7 @@ export class RemoteProxy_Class<Config extends RemoteProxyConfig>
 		if (!expectedSecret.urls || !expectedSecret.urls.includes(requestUrl))
 			throw new ApiException(403, `Requested url '${requestUrl}' is not allowed from proxyId: ${proxyId}`);
 
-		return expectedSecret.extras
+		return expectedSecret.extras;
 	}
 
 	async processApi(request: ExpressRequest, requestData: HttpRequestData) {

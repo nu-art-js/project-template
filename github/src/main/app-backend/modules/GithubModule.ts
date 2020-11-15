@@ -25,7 +25,9 @@ import {
 	Octokit,
 	RestEndpointMethodTypes
 } from '@octokit/rest';
-import {OctokitResponse, ReposGetContentResponseData} from "@octokit/types"
+import {
+	OctokitResponse, ReposGetContentResponseData
+} from "@octokit/types"
 import * as path from "path";
 import {
 	ExpressRequest,

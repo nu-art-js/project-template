@@ -24,8 +24,7 @@ import {
 	FirestoreCollection,
 	FirebaseModule
 } from "@nu-art/firebase/backend";
-import {GetUserData} from "@nu-art/push-pub-sub/backend";
-
+import {QueryRequestInfo} from "@nu-art/thunderstorm/backend";
 
 type Config = {
 	options: string[],
@@ -34,14 +33,13 @@ type Config = {
 
 class ExampleModule_Class
 	extends Module<Config>
-	implements GetUserData {
+	implements QueryRequestInfo {
 	dispatcher = new Dispatcher<TestDispatch, 'testDispatch'>('testDispatch');
 
-
-	async __getUserData(): Promise<{ key: string; data: any }> {
+	async __queryRequestInfo(): Promise<{ key: string; data: any }> {
 		return {
-			key: 'userId', data: {_id: 'noabkr@intuitionrobotics.com'}
-		}
+			key: 'AccountsModule', data: {_id: 'noabkr@intuitionrobotics.com'}
+		};
 	}
 
 	getRandomString() {

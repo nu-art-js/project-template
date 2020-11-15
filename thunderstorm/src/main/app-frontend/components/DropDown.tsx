@@ -161,8 +161,8 @@ export class DropDown<ItemType>
 	}
 
 	static getDerivedStateFromProps(nextProps: Props_DropDown<any>, prevState: State<any>): Partial<State<any>> | null {
-		if (prevState.id !== nextProps.id)
-			console.log(`Changing ids: ${prevState.id} => ${nextProps.id}`);
+		// if (prevState.id !== nextProps.id)
+			// console.log(`Changing ids: ${prevState.id} => ${nextProps.id}`);
 
 		if (prevState.adapter.data === nextProps.adapter.data)
 			return null;

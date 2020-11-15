@@ -19,15 +19,15 @@
 
 import {
 	ApiResponse,
+	ExpressRequest,
 	ServerApi
 } from "@nu-art/thunderstorm/backend";
 
 import {HttpMethod} from "@nu-art/thunderstorm";
 import {
-	AccountModule,
-	AccountApi_ValidateSession
+	AccountApi_ValidateSession,
+	AccountModule
 } from "./_imports";
-import {ExpressRequest} from "@nu-art/thunderstorm/backend";
 
 class ValidateToken
 	extends ServerApi<AccountApi_ValidateSession> {
@@ -37,8 +37,8 @@ class ValidateToken
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: {}, body: void) {
-		const account = await AccountModule.validateSession(request);
-		return {email: account.email};
+		const {email, _id} = await AccountModule.validateSession(request);
+		return {email, _id};
 	}
 }
 

@@ -21,7 +21,6 @@
 
 import {FirebaseModule} from "@nu-art/firebase/backend";
 import {
-	BadImplementationException,
 	BeLogged,
 	LogClient_Function,
 	LogClient_Terminal,
@@ -87,8 +86,8 @@ export class Storm
 		this.startServerImpl(onStarted)
 		    .then(() => console.log("Server Started!!"))
 		    .catch(reason => {
-			    this.logError(reason);
-			    throw new BadImplementationException("Failed to start backend: ", reason);
+			    this.logError("failed to launch server", reason);
+			    throw reason;
 		    });
 
 		return this.functions.reduce((toRet, _function) => {

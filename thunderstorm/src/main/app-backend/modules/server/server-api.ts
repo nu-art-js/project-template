@@ -31,7 +31,8 @@ import {
 	ServerErrorSeverity,
 	validate,
 	ValidatorTypeResolver,
-	ValidationException
+	ValidationException,
+    LogLevel
 } from "@nu-art/ts-common";
 
 import {Stream} from "stream";
@@ -87,6 +88,8 @@ export abstract class ServerApi<Binder extends ApiTypeBinder<string, R, B, P>, R
 
 	protected constructor(method: HttpMethod, relativePath: string, tag?: string) {
 		super(tag || relativePath);
+		this.setMinLevel(ServerApi.isDebug? LogLevel.Verbose:LogLevel.Info)
+
 		this.method = method;
 		this.relativePath = `/${relativePath}`;
 	}
@@ -139,7 +142,7 @@ export abstract class ServerApi<Binder extends ApiTypeBinder<string, R, B, P>, R
 	call = async (req: ExpressRequest, res: ExpressResponse) => {
 		const response: ApiResponse = new ApiResponse(this, res);
 
-		this.logInfo(`-- Url: ${req.path}`);
+		this.logInfo(`Intercepted Url: ${req.path}`);
 
 		if (this.headersToLog.length > 0) {
 			const headers: { [s: string]: string | undefined } = {}
@@ -323,7 +326,6 @@ export class ApiResponse {
 		this.consume();
 
 		this.printHeaders(headers);
-		this.api.logVerbose("Response with stream");
 		this.res.set(headers);
 		this.res.writeHead(responseCode);
 		stream.pipe(this.res, {end: false});

@@ -22,21 +22,23 @@ import {
 	ImplementationMissingException,
 	Module,
 	removeFromArray,
-	StringMap
+	StringMap,
+	BadImplementationException
 } from "@nu-art/ts-common";
 
 import {
 	HttpModule,
-	ThunderDispatcher,
-	ToastModule
+	ThunderDispatcher
 } from "@nu-art/thunderstorm/frontend";
 // noinspection TypeScriptPreferShortImport
 import {
 	BaseSubscriptionData,
+	DB_Notifications,
 	IFP,
 	ISP,
 	ITP,
 	MessageType,
+	PubSubReadNotification,
 	PubSubRegisterClient,
 	Request_PushRegister,
 	SubscribeProps,
@@ -69,6 +71,11 @@ type FirebaseConfig = {
 export type PushPubSubConfig = {
 	config?: FirebaseConfig
 	publicKeyBase64: string
+	swFileName?: string
+}
+
+export interface OnNotificationsReceived {
+	__onNotificationsReceived(): void
 }
 
 
@@ -80,17 +87,20 @@ export class PushPubSubModule_Class
 	private messaging?: MessagingWrapper;
 
 	private dispatch_pushMessage = new ThunderDispatcher<OnPushMessageReceived<MessageType<any, any, any>>, "__onMessageReceived">("__onMessageReceived");
+	private dispatch_notifications = new ThunderDispatcher<OnNotificationsReceived, '__onNotificationsReceived'>('__onNotificationsReceived');
+
+	private notifications: DB_Notifications[] = [];
 
 	init() {
 		if (!this.config?.publicKeyBase64)
 			throw new ImplementationMissingException(`Please specify the right config for the 'PushPubSubModule'`);
 
-		this.runAsync('Initializing Firebase SDK and registering SW', this.initApp)
+		this.runAsync('Initializing Firebase SDK and registering SW', this.initApp);
 	}
 
 	private registerServiceWorker = async () => {
-		console.log('registering...')
-		return await navigator.serviceWorker.register('/ts_service_worker.js');
+		console.log('registering...');
+		return await navigator.serviceWorker.register(`/${this.config.swFileName || 'ts_service_worker.js'}`);
 	};
 
 	private initApp = async () => {
@@ -101,19 +111,19 @@ export class PushPubSubModule_Class
 			];
 
 			const {0: registration, 1: app} = await Promise.all(asyncs);
-			await registration.update()
+			await registration.update();
 			this.messaging = app.getMessaging();
 			// this.messaging.usePublicVapidKey(this.config.publicKeyBase64);
-			this.messaging.useServiceWorker(registration);
+			// await this.messaging.useServiceWorker(registration);
 			await this.getToken({vapidKey: this.config.publicKeyBase64, serviceWorkerRegistration: registration});
 			if (navigator.serviceWorker.controller) {
 				console.log(`This page is currently controlled by: ${navigator.serviceWorker.controller}`);
 			}
-			navigator.serviceWorker.oncontrollerchange = function() {
+			navigator.serviceWorker.oncontrollerchange = function () {
 				console.log('This page is now controlled by:', navigator.serviceWorker.controller);
 			};
 			navigator.serviceWorker.onmessage = (event: MessageEvent) => {
-				this.processMessageFromSw(event.data)
+				this.processMessageFromSw(event.data);
 			};
 		}
 	};
@@ -131,19 +141,23 @@ export class PushPubSubModule_Class
 				return;
 
 			if (!this.messaging)
-				return;
+				throw new BadImplementationException('I literally just set this!');
 
 			this.firebaseToken = await this.messaging.getToken(options);
 			if (!this.firebaseToken)
 				return;
 
-			await this.register();
+			this.messaging.onMessage((payload) => {
+				this.processMessage(payload.data);
+			});
+
 			this.logVerbose('new token received: ' + this.firebaseToken);
-			this.messaging.onTokenRefresh(() => this.runAsync('Token refresh', async () => this.getToken(options)));
 
 			this.messaging.onMessage((payload) => {
-				this.processMessage(payload.data)
+				this.processMessage(payload.data);
 			});
+
+			await this.register();
 
 		} catch (err) {
 			this.logError("Unable to get token", err);
@@ -155,7 +169,7 @@ export class PushPubSubModule_Class
 		if (!data.command || !data.message || data.command !== Command_SwToApp)
 			return;
 
-		this.processMessage(data.message)
+		this.processMessage(data.message);
 	};
 
 	private processMessage = (data: StringMap) => {
@@ -169,7 +183,7 @@ export class PushPubSubModule_Class
 		});
 	};
 
-	subscribe = async (subscription: BaseSubscriptionData) => {
+	subscribe = async (subscription: BaseSubscriptionData): Promise<void> => {
 		this.subscribeImpl(subscription);
 		return this.register();
 	};
@@ -181,7 +195,7 @@ export class PushPubSubModule_Class
 		addItemToArray(this.subscriptions, subscription);
 	}
 
-	subscribeMulti = async (subscriptions: BaseSubscriptionData[]) => {
+	subscribeMulti = async (subscriptions: BaseSubscriptionData[]): Promise<void> => {
 		subscriptions.forEach(subscription => this.subscribeImpl(subscription));
 		return this.register();
 	};
@@ -191,8 +205,25 @@ export class PushPubSubModule_Class
 		return this.register();
 	};
 
-	private register = async () => {
-		if (!this.firebaseToken || this.subscriptions.length === 0)
+	getNotifications = () => this.notifications;
+
+	readNotification = (id: string, read: boolean) => {
+		//make an api call that changes the read boolean of the notification id thats passed in
+		const body = {
+			_id: id,
+			read
+		};
+
+		HttpModule
+			.createRequest<PubSubReadNotification>(HttpMethod.POST, 'read-notification')
+			.setUrl('/v1/push/read-notification')
+			.setJsonBody(body)
+			.setOnError('Something went wrong while reading your notification')
+			.execute();
+	};
+
+	private register = async (): Promise<void> => {
+		if (!this.firebaseToken)
 			return;
 
 		const body: Request_PushRegister = {
@@ -200,19 +231,21 @@ export class PushPubSubModule_Class
 			subscriptions: this.subscriptions.map(({pushKey, props}) => ({pushKey, props}))
 		};
 
-		return new Promise(resolve => {
-			this.debounce(() => {
-				HttpModule
+		await new Promise((resolve, reject) => {
+			this.debounce(async () => {
+				const response = await HttpModule
 					.createRequest<PubSubRegisterClient>(HttpMethod.POST, 'register-pub-sub-tab')
 					.setRelativeUrl("/v1/push/register")
 					.setJsonBody(body)
-					.setOnError(() => ToastModule.toastError("Failed to register for push"))
-					.execute((response) => {
-						resolve()
-					})
-			}, 'push-registration', 800)
-		})
+					.setOnError("Failed to register for push")
+					.executeSync();
+				this.dispatch_notifications.dispatchModule([]);
+				this.notifications = response;
+				this.logVerbose('Finished register PubSub');
+				resolve();
+			}, 'push-registration', 800);
 
+		});
 	};
 }
 

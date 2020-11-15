@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 import {
+	__stringify,
 	auditBy,
 	currentTimeMillies,
 	Day,
@@ -24,8 +25,7 @@ import {
 	generateHex,
 	hashPasswordWithSalt,
 	Module,
-	validate,
-	__stringify
+	validate
 } from "@nu-art/ts-common";
 
 
@@ -45,7 +45,8 @@ import {
 import {
 	ApiException,
 	ExpressRequest,
-	HeaderKey
+	HeaderKey,
+	QueryRequestInfo
 } from "@nu-art/thunderstorm/backend";
 import {validateEmail} from "@nu-art/db-api-generator/backend";
 
@@ -75,7 +76,21 @@ function getUIAccount(account: DB_Account): UI_Account {
 }
 
 export class AccountsModule_Class
-	extends Module<Config> {
+	extends Module<Config>
+	implements QueryRequestInfo {
+
+	async __queryRequestInfo(request: ExpressRequest): Promise<{ key: string; data: any; } > {
+		let data: UI_Account | undefined;
+		try {
+			data = await this.validateSession(request);
+		} catch (e) {
+		}
+
+		return {
+			key: this.getName(),
+			data: data
+		};
+	}
 
 	private sessions!: FirestoreCollection<DB_Session>;
 	private accounts!: FirestoreCollection<DB_Account>;
@@ -216,7 +231,7 @@ export class AccountsModule_Class
 	}
 
 	private async getUserEmailFromSession(session: DB_Session) {
-		const account = await this.accounts.queryUnique({where: {_id: session.userId}})
+		const account = await this.accounts.queryUnique({where: {_id: session.userId}});
 		if (!account) {
 			await this.sessions.deleteItem(session);
 			throw new ApiException(403, `No user found for session: ${__stringify(session)}`);
@@ -227,7 +242,7 @@ export class AccountsModule_Class
 
 	private TTLExpired = (session: DB_Session) => {
 		const delta = currentTimeMillies() - session.timestamp;
-		return delta > Day || delta < 0
+		return delta > Day || delta < 0;
 	};
 
 	private upsertSession = async (userId: string): Promise<Response_Auth> => {

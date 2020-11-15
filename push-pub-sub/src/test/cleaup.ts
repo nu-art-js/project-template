@@ -44,7 +44,8 @@ export const scenarioCleanup = __scenario("Scheduled Cleaup");
 const testRegister = async function (request: Request_PushRegister, timestamp: number) {
 	const session: DB_PushSession = {
 		firebaseToken: request.firebaseToken,
-		timestamp
+		timestamp,
+		userId: 'fake-user'
 	};
 
 	// @ts-ignore
@@ -63,13 +64,13 @@ const testRegister = async function (request: Request_PushRegister, timestamp: n
 		const data = await transaction.query(pushKeysCollection, {where: {firebaseToken: request.firebaseToken}});
 		const toInsert = subscriptions.filter(s => !data.find((d: DB_PushKeys) => compare(d, s)));
 		return Promise.all(toInsert.map(instance => transaction.insert(pushKeysCollection, instance)));
-	})
+	});
 };
 
 const processClean = __custom(async () => {
 	// @ts-ignore
-	const asyncs = [PushPubSubModule.pushKeys.deleteAll(), PushPubSubModule.pushSessions.deleteAll()]
-	return Promise.all(asyncs)
+	const asyncs = [PushPubSubModule.pushKeys.deleteAll(), PushPubSubModule.pushSessions.deleteAll()];
+	return Promise.all(asyncs);
 }).setLabel('Start Clean');
 
 const populate = (timestamp: number) => __custom(async () => {
@@ -86,7 +87,7 @@ const cleaup = __custom(async () => PushPubSubModule.scheduledCleanup()).setLabe
 
 const check = __custom(async () => {
 	// @ts-ignore
-	const docs = await PushPubSubModule.pushSessions.query({where: {timestamp: {$lt: currentTimeMillies() - Hour}}})
+	const docs = await PushPubSubModule.pushSessions.query({where: {timestamp: {$lt: currentTimeMillies() - Hour}}});
 	assert(`There shouldn't be any docs`, docs.length, 0);
 }).setLabel('Checking clean');
 
