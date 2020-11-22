@@ -24,7 +24,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const WriteFilePlugin = require('write-file-webpack-plugin');
 const packageJson = require('./package.json');
 const webpack = require("webpack");
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+// const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const sourcePath = path.join(__dirname, './src');
 const swFolder = path.join(__dirname, './src/sw/');
 const swConfig = path.join(__dirname, './src/sw/tsconfig.json');
@@ -32,13 +32,14 @@ const mainFolder = path.join(__dirname, './src/main/');
 const mainConfig = path.join(__dirname, './src/main/tsconfig.json');
 
 // const isDevelopment = true;
-const isDevelopment = process.env.NODE_ENV !== 'production';
-const reactRefreshWebpackPlugin = new ReactRefreshWebpackPlugin();
-reactRefreshWebpackPlugin.options.overlay = false;
+// const isDevelopment = process.env.NODE_ENV !== 'production';
+// const reactRefreshWebpackPlugin = new ReactRefreshWebpackPlugin();
+// reactRefreshWebpackPlugin.options.overlay = false;
 
 module.exports = (env, argv) => {
 
-	const envConfig = require(`./_config/${env}`);
+	// const envConfig = require(`./_config/${env}`);
+	const envConfig = require('./_config/' + env);
 
 	console.log("env: " + env);
 
@@ -60,10 +61,10 @@ module.exports = (env, argv) => {
 		devtool: "source-map",
 
 		devServer: {
-			hot: true,
+			// hot: true,
 			historyApiFallback: true,
 			compress: true,
-			https: envConfig.getDevServerSSL(),
+			https: !argv.ssl ? undefined : envConfig.getDevServerSSL(),
 			port: envConfig.getHostingPort(),
 		},
 
@@ -83,14 +84,6 @@ module.exports = (env, argv) => {
 
 		module: {
 			rules: [
-				isDevelopment && {
-					test: /main\/.+\.tsx?$/,
-					include: [mainFolder],
-					use: {
-						loader: 'babel-loader',
-						options: {plugins: ['react-refresh/babel']}
-					}
-				},
 				{
 					test: /sw\/.+\.ts$/,
 					include: [swFolder],
@@ -108,7 +101,6 @@ module.exports = (env, argv) => {
 						loader: "awesome-typescript-loader",
 						options: {
 							configFileName: mainConfig,
-							forceIsolatedModules: true
 						}
 					}
 				},
@@ -161,6 +153,14 @@ module.exports = (env, argv) => {
 						'sass-loader'
 					]
 				}
+				// isDevelopment && {
+				// 	test: /main\/.+\.tsx?$/,
+				// 	include: [mainFolder],
+				// 	use: {
+				// 		loader: 'babel-loader',
+				// 		options: {plugins: ['react-refresh/babel']}
+				// 	}
+				// }
 			]
 		},
 		plugins: [
@@ -185,7 +185,7 @@ module.exports = (env, argv) => {
 			envConfig.getPrettifierPlugin(),
 			new WriteFilePlugin(),
 			// isDevelopment && new webpack.HotModuleReplacementPlugin(),
-			isDevelopment && reactRefreshWebpackPlugin,
+			// isDevelopment && reactRefreshWebpackPlugin,
 		].filter(plugin => plugin),
 
 	};
