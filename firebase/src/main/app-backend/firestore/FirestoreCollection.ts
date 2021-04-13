@@ -45,7 +45,7 @@ export class FirestoreCollection<Type extends object> {
 	/**
 	 * External unique as in there must never ever be two that answer the same query
 	 */
-	readonly externalUniqueFilter: ((object: Subset<Type>) => Clause_Where<Type>);
+	readonly externalUniqueFilter: ((object: Partial<Type>) => Clause_Where<Type>);
 
 	constructor(name: string, wrapper: FirestoreWrapper, externalFilterKeys?: FilterKeys<Type>) {
 		this.name = name;
@@ -54,7 +54,7 @@ export class FirestoreCollection<Type extends object> {
 			console.log("Please follow name pattern for collections /[a-z-]{3,}/")
 
 		this.collection = wrapper.firestore.collection(name);
-		this.externalUniqueFilter = (instance: Type) => {
+		this.externalUniqueFilter = (instance: Partial<Type>) => {
 			if (!externalFilterKeys)
 				throw new BadImplementationException("In order to use a unique query your collection MUST have a unique filter");
 

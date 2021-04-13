@@ -54,7 +54,7 @@ export class FirestoreTransaction {
 		return (await this._query(collection, ourQuery)).map(result => result.data() as Type);
 	}
 
-	async queryItem<Type extends object>(collection: FirestoreCollection<Type>, instance: Type): Promise<Type | undefined> {
+	async queryItem<Type extends object>(collection: FirestoreCollection<Type>, instance: Partial<Type>): Promise<Type | undefined> {
 		const ourQuery = FirestoreInterface.buildUniqueQuery(collection, instance);
 		return this.queryUnique(collection, ourQuery);
 	}

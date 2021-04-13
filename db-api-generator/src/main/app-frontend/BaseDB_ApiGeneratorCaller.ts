@@ -33,6 +33,7 @@ import {
 	ApiBinder_DBDelete,
 	ApiBinder_DBQuery,
 	ApiBinder_DBUniuqe,
+	ApiBinder_DBUpdate,
 	DefaultApiDefs,
 	GenericApiDef
 } from "../index";
@@ -83,7 +84,7 @@ export abstract class BaseDB_ApiGeneratorCaller<DBType extends DB_Object, UType 
 		P extends QueryParams = DeriveQueryType<Binder>>(apiDef: GenericApiDef): BaseHttpRequest<Binder> {
 
 		const request = XhrHttpModule
-			.createRequest(apiDef.method, `request-api--${this.config.key}-${apiDef.key}`)
+			.createRequest(apiDef.method, this.getKey(apiDef))
 			.setRelativeUrl(`${this.config.relativeUrl}${apiDef.suffix ? "/" + apiDef.suffix : ""}`)
 			.setOnError(this.errorHandler) as BaseHttpRequest<any>;
 
@@ -92,6 +93,10 @@ export abstract class BaseDB_ApiGeneratorCaller<DBType extends DB_Object, UType 
 			request.setTimeout(timeout);
 
 		return request;
+	}
+
+	protected getKey(apiDef: GenericApiDef) {
+		return `request-api--${this.config.key}-${apiDef.key}`;
 	}
 
 	protected timeoutHandler(apiDef: GenericApiDef): number | void {
@@ -110,9 +115,9 @@ export abstract class BaseDB_ApiGeneratorCaller<DBType extends DB_Object, UType 
 			});
 	}
 
-	update = (toUpdate: DBType): BaseHttpRequest<ApiBinder_DBCreate<DBType>> => {
+	update = (toUpdate: DB_Object & Partial<DBType>): BaseHttpRequest<ApiBinder_DBUpdate<DBType>> => {
 		return this
-			.createRequest<ApiBinder_DBCreate<DBType>>(DefaultApiDefs.Update)
+			.createRequest<ApiBinder_DBUpdate<DBType>>(DefaultApiDefs.Update)
 			.setJsonBody(toUpdate)
 			.execute(async response => {
 				return this.onEntryUpdated(response);

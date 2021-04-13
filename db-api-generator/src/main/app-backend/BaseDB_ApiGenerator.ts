@@ -102,7 +102,13 @@ export type Config<Type extends object> = {
  *
  * By default, it exposes API endpoints for creating, deleting, updating, querying and querying for unique document.
  */
-export abstract class BaseDB_ApiGenerator<DBType extends DB_Object, ConfigType extends Config<DBType> = Config<DBType>, UType extends PartialProperties<DBType, "_id"> = PartialProperties<DBType, "_id">>
+export abstract class BaseDB_ApiGenerator<
+	DBType extends DB_Object,
+	ConfigType extends Config<DBType> = Config<DBType>,
+	UType extends PartialProperties<DBType, "_id"> = PartialProperties<DBType, "_id">,
+	ExternalFilterKeys extends keyof DBType = keyof DBType,
+	EType extends Pick<DBType, ExternalFilterKeys> & Partial<DBType> = Pick<DBType, ExternalFilterKeys> & Partial<DBType>
+	>
 	extends Module<ConfigType>
 	implements OnFirestoreBackupSchedulerAct {
 
@@ -210,6 +216,7 @@ export abstract class BaseDB_ApiGenerator<DBType extends DB_Object, ConfigType e
 	 *
 	 * @param transaction - The transaction object.
 	 * @param instance - The document for which the uniqueness assertion will occur.
+	 * @param request - Incoming request object
 	 */
 	public async assertUniqueness(transaction: FirestoreTransaction, instance: DBType, request?: ExpressRequest) {
 		await this.preUpsertProcessing(transaction, instance, request);
@@ -562,7 +569,7 @@ export abstract class BaseDB_ApiGenerator<DBType extends DB_Object, ConfigType e
 	 * @returns
 	 * A promise of the patched document.
 	 */
-	async patch(instance: DBType, propsToPatch?: (keyof DBType)[], request?: ExpressRequest): Promise<DBType> {
+	async patch(instance: EType, propsToPatch?: (keyof DBType)[], request?: ExpressRequest): Promise<DBType> {
 		return this.collection.runInTransaction(async (transaction) => {
 			const dbInstance: DBType = await this.assertExternalQueryUnique(instance, transaction);
 			// If the caller has specified props to be changed, make sure the don't conflict with the lockKeys.
@@ -572,10 +579,10 @@ export abstract class BaseDB_ApiGenerator<DBType extends DB_Object, ConfigType e
 
 			// If the caller has not specified props, we remove the keys from the caller's instance
 			// before merging with the original dbInstance.
-			_keys(instance).forEach(key => {
-				if (this.config.lockKeys.includes(key) || (propsToPatch && !propsToPatch.includes(key))) {
+			_keys<EType, keyof EType>(instance).forEach((key: keyof EType) => {
+				const k = key as keyof DBType;
+				if (this.config.lockKeys.includes(k) || (propsToPatch && !propsToPatch.includes(key as keyof DBType)))
 					delete instance[key];
-				}
 			});
 
 			const mergedObject = merge(dbInstance, instance);

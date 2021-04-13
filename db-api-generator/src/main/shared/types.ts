@@ -60,6 +60,6 @@ export type GenericApiDef = { method: HttpMethod, key: string, suffix?: string }
 export type ApiBinder_DBCreate<DBType extends DB_Object, RequestType extends Omit<DBType, "_id"> = Omit<DBType, "_id">> = ApiWithBody<string, RequestType, DBType>;
 export type ApiBinder_DBDelete<DBType extends DB_Object> = ApiWithQuery<string, DBType, DB_Object>;
 export type ApiBinder_DBUniuqe<DBType extends DB_Object> = ApiWithQuery<string, DBType, DB_Object>;
-export type ApiBinder_DBUpdate<DBType extends DB_Object> = ApiWithBody<string, DBType, DBType>;
+export type ApiBinder_DBUpdate<DBType extends DB_Object> = ApiWithBody<string, DB_Object & Partial<DBType>, DBType>;
 export type ApiBinder_DBQuery<DBType extends DB_Object> = ApiWithBody<string, Partial<DBType>, DBType[]>;
 

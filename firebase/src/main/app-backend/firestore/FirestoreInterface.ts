@@ -119,7 +119,7 @@ export class FirestoreInterface {
 		return results[0];
 	};
 
-	static buildUniqueQuery<Type extends object>(collection: FirestoreCollection<Type>, instance: Type): FirestoreQuery<Type> {
+	static buildUniqueQuery<Type extends object>(collection: FirestoreCollection<Type>, instance: Partial<Type>): FirestoreQuery<Type> {
 		_keys(instance).forEach((key) => {
 			if (instance[key] === undefined || instance[key] === null) {
 				throw new BadImplementationException(

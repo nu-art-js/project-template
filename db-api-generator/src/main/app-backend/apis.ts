@@ -98,7 +98,7 @@ export class ServerApi_Update<DBType extends DB_Object>
 		super(dbModule, DefaultApiDefs.Update, pathPart);
 	}
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: {}, body: DBType): Promise<DBType> {
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: {}, body: DB_Object & Partial<DBType>): Promise<DBType> {
 		return this.dbModule.patch(body, undefined, request);
 	}
 }
